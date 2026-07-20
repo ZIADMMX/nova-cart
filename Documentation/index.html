@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaCart - Documentation</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
+        .container { background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #2c3e50; }
+        h1 { border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 40px; }
+        pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 14px; }
+        code { font-family: 'Courier New', Courier, monospace; }
+        .alert { padding: 15px; background-color: #d9edf7; border-left: 5px solid #31708f; margin-bottom: 20px; border-radius: 4px; }
+        .alert-warning { background-color: #fcf8e3; border-left: 5px solid #8a6d3b; color: #8a6d3b; }
+        ul, ol { margin-left: 20px; }
+        li { margin-bottom: 10px; }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NovaCart - Full-Stack E-Commerce Solution</h1>
+        <p><strong>Created:</strong> July 2026</p>
+        <p><strong>Author:</strong> Ziad</p>
+        
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">1. Introduction</a></li>
+            <li><a href="#requirements">2. System Requirements</a></li>
+            <li><a href="#installation">3. Installation Guide</a></li>
+            <li><a href="#configuration">4. Environment Configuration</a></li>
+            <li><a href="#running">5. Running the Application</a></li>
+            <li><a href="#admin">6. Admin Panel Setup</a></li>
+            <li><a href="#payment">7. Payment Gateways</a></li>
+        </ul>
+
+        <h2 id="introduction">1. Introduction</h2>
+        <p>Welcome to NovaCart! This is a modern, blazing fast, and highly secure E-Commerce platform built using Next.js 14, React, MongoDB, and TailwindCSS. It comes out of the box with an AI-powered Chatbot assistant, Stripe & Paymob payment integrations, and a powerful Admin Dashboard.</p>
+
+        <h2 id="requirements">2. System Requirements</h2>
+        <p>Before you begin, make sure you have the following installed on your server or local machine:</p>
+        <ul>
+            <li><strong>Node.js</strong>: Version 18.17.0 or higher</li>
+            <li><strong>NPM / Yarn</strong>: Node Package Manager</li>
+            <li><strong>MongoDB</strong>: A MongoDB cluster (MongoDB Atlas is recommended)</li>
+        </ul>
+
+        <h2 id="installation">3. Installation Guide</h2>
+        <p>Follow these steps to set up the project locally or on your server:</p>
+        <ol>
+            <li>Unzip the downloaded package.</li>
+            <li>Open a terminal and navigate to the <code>Source_Code</code> directory.</li>
+            <li>Run the following command to install all necessary dependencies:</li>
+        </ol>
+        <pre><code>npm install</code></pre>
+
+        <h2 id="configuration">4. Environment Configuration</h2>
+        <div class="alert alert-warning">
+            <strong>Important:</strong> You must configure your environment variables for the application to connect to the database and payment gateways.
+        </div>
+        <p>In the root folder, you will find a file named <code>.env.example</code>. Rename this file to <code>.env</code> (or create a new <code>.env</code> file) and fill in your credentials as follows:</p>
+        <pre><code># MongoDB Connection String
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/novacart
+
+# JWT Secret for Authentication (Generate any random strong string)
+JWT_SECRET=your_super_secret_jwt_string
+
+# Public URL (Change this in production, e.g., https://yourdomain.com)
+NEXT_PUBLIC_URL=http://localhost:3000
+
+# Gemini API Key for AI Chatbot
+GEMINI_API_KEY=your_gemini_key
+
+# Paymob Credentials
+PAYMOB_API_KEY=your_paymob_api_key
+PAYMOB_HMAC_SECRET=your_hmac_secret
+PAYMOB_INTEGRATION_ID=your_integration_id
+PAYMOB_IFRAME_ID=your_iframe_id</code></pre>
+
+        <h2 id="running">5. Running the Application</h2>
+        <p>To run the application in <strong>development</strong> mode:</p>
+        <pre><code>npm run dev</code></pre>
+        <p>To build and run the application in <strong>production</strong> mode (Recommended for live servers):</p>
+        <pre><code>npm run build
+npm start</code></pre>
+
+        <h2 id="admin">6. Admin Panel Setup</h2>
+        <p>By default, the first user registered is a regular user. To grant Admin access:</p>
+        <ol>
+            <li>Register a new account on your website normally via the <code>/auth/register</code> page.</li>
+            <li>Open your MongoDB Database Dashboard (e.g., MongoDB Atlas).</li>
+            <li>Go to the <code>users</code> collection.</li>
+            <li>Find your registered user document and change the <code>role</code> field from <code>"user"</code> to <code>"super_admin"</code>.</li>
+            <li>Log back into your account on the website. You will now have access to the Admin Dashboard at <code>/dashboard</code>.</li>
+        </ol>
+
+        <h2 id="payment">7. Payment Gateways</h2>
+        <h3>Stripe Integration</h3>
+        <p>To use Stripe, ensure you have your Stripe Secret Key and Public Key. Update your codebase or environment variables with the live keys to accept real payments. Register your webhook URL in the Stripe dashboard as <code>https://yourdomain.com/api/webhook/stripe</code>.</p>
+        
+        <h3>Paymob Integration</h3>
+        <p>For Paymob (Egypt/MENA), you have entered the integration details in the <code>.env</code> file. Ensure your callback URLs in the Paymob dashboard are set to <code>https://yourdomain.com/api/paymob/verify</code>.</p>
+        
+        <br>
+        <hr>
+        <p style="text-align: center; color: #777; margin-top: 20px;">Thank you for purchasing NovaCart! For support, please contact via the CodeCanyon support tab.</p>
+    </div>
+</body>
+</html>
