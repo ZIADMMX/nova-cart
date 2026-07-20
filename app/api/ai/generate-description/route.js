@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 export async function POST(req) {
     try {
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        if (!GEMINI_API_KEY) {
+            return NextResponse.json({ message: "مفتاح الذكاء الاصطناعي غير متوفر (GEMINI_API_KEY)" }, { status: 400 });
+        }
+        
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
         const user = await getAuthFromCookie();
         if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
