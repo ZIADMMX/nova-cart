@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, Package, Star, CheckCircle, ArrowLeft, AlertOctagon } from "lucide-react";
+import { Loader2, Package, Star, CheckCircle, ArrowLeft, AlertOctagon, User, Send } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import BuyButton from "@/components/UI/buyButton";
 import AddToCartButton from "@/components/UI/AddToCartButton";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function ProductPage() {
     const params = useParams(); 
+    const { isAuthenticated } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [mounted, setMounted] = useState(false);
+    const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+    const [reviewLoading, setReviewLoading] = useState(false);
+    const [reviewError, setReviewError] = useState("");
+    const [reviewSuccess, setReviewSuccess] = useState("");
 
     // 1. تأمين الـ Hydration أولاً لمنع تعارض السيرفر والعميل
     useEffect(() => {
@@ -41,6 +47,35 @@ export default function ProductPage() {
             setError(err.message || "حدث خطأ أثناء الاتصال بالخادم.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        setReviewLoading(true);
+        setReviewError("");
+        setReviewSuccess("");
+
+        try {
+            const res = await fetch(`/api/products/${params.id}/reviews`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reviewForm),
+            });
+            
+            const data = await res.json();
+            
+            if (!res.ok) {
+                throw new Error(data.message || "حدث خطأ أثناء إضافة التقييم");
+            }
+            
+            setReviewSuccess("تم إضافة تقييمك بنجاح!");
+            setProduct(data.product); // Update product to show new review
+            setReviewForm({ rating: 5, comment: "" });
+        } catch (err) {
+            setReviewError(err.message);
+        } finally {
+            setReviewLoading(false);
         }
     };
 
@@ -109,7 +144,7 @@ export default function ProductPage() {
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center text-yellow-500 gap-1 bg-yellow-500/10 px-2 py-0.5 rounded-md text-sm font-bold">
                                         <Star className="w-4 h-4 fill-yellow-500" />
-                                        <span>4.5</span> 
+                                        <span>{product.rating ? product.rating.toFixed(1) : "0.0"} ({product.numReviews || 0})</span> 
                                     </div>
                                     
                                     {/* إصلاح منطق فحص وحقن المخزون والأيقونات */}
@@ -152,6 +187,95 @@ export default function ProductPage() {
                             </div>
                         </div>
 
+                    </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800/80 p-6 sm:p-8">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">التقييمات والمراجعات</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            {product.reviews && product.reviews.length > 0 ? (
+                                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                    {product.reviews.map((review, idx) => (
+                                        <div key={idx} className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                                        <User className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="font-bold text-sm text-gray-900 dark:text-white">{review.name}</span>
+                                                </div>
+                                                <div className="flex items-center text-yellow-500 gap-0.5">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className={`w-3 h-3 ${i < review.rating ? "fill-yellow-500" : "text-gray-300 dark:text-gray-600"}`} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400">{review.comment}</p>
+                                            <span className="text-[10px] text-slate-400 mt-2 block">{new Date(review.createdAt).toLocaleDateString('ar-EG')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-10 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                    <Star className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">لا توجد تقييمات حتى الآن، كن أول من يقيم هذا المنتج!</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">أضف تقييمك</h3>
+                            {isAuthenticated ? (
+                                <form onSubmit={handleReviewSubmit} className="space-y-4 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    {reviewError && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100">{reviewError}</div>}
+                                    {reviewSuccess && <div className="p-3 bg-green-50 text-green-600 text-xs font-bold rounded-lg border border-green-100">{reviewSuccess}</div>}
+                                    
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 mb-2">التقييم (من 1 لـ 5)</label>
+                                        <select 
+                                            value={reviewForm.rating} 
+                                            onChange={(e) => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
+                                            className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                                        >
+                                            <option value={5}>5 - ممتاز جداً</option>
+                                            <option value={4}>4 - جيد جداً</option>
+                                            <option value={3}>3 - متوسط</option>
+                                            <option value={2}>2 - سيء</option>
+                                            <option value={1}>1 - سيء جداً</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 mb-2">تعليقك</label>
+                                        <textarea 
+                                            value={reviewForm.comment}
+                                            onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                                            required
+                                            rows={3}
+                                            placeholder="اكتب تجربتك مع المنتج..."
+                                            className="w-full resize-none bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <button 
+                                        type="submit" 
+                                        disabled={reviewLoading}
+                                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                                    >
+                                        {reviewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                        نشر التقييم
+                                    </button>
+                                </form>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">يجب تسجيل الدخول لتتمكن من التقييم</p>
+                                    <Link href="/auth/login" className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors">
+                                        تسجيل الدخول
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

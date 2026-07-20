@@ -3,6 +3,7 @@ import connectToMongo from "@/lib/db";
 import Product from "@/model/Product";
 import { getAuthFromCookie } from "@/lib/auth";
 import { rateLimit } from "@/lib/rateLimit"; // 🚨 إضافة حماية السيرفر
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function escapeRegex(string) {
     return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -92,6 +93,9 @@ export async function POST(request) {
         
         if (GEMINI_API_KEY) {
             try {
+                const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
                 // صياغة الـ Context الذكي لـ Gemini
                 const productContext = foundProducts.map(p => 
                     `- Product: "${p.title}" | Category: "${p.category}" | Price: $${p.price} | Stock: ${p.stock} units | Description: "${p.description}"`
@@ -109,35 +113,19 @@ Instructions:
 2. Do not hallucinate or recommend any products that are not present in the provided list.
 3. If no products are found, politely suggest they search for other keywords or categories.
 4. Be concise, polite, and persuasive. Avoid technical JSON formatting in your final response. Keep it conversational.
+5. If the user asks general questions like "who are you" or "hi", introduce yourself and ask how you can help.
 
 Customer query: "${cleanMessage}"`;
 
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
-                const response = await fetch(geminiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt }] }]
-                    })
-                });
-
-                if (response.ok) {
-                    const geminiData = await response.json();
-                    const aiReply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+                const result = await model.generateContent(systemPrompt);
+                const aiReply = result.response.text();
                     
-                    if (aiReply) {
-                        return NextResponse.json({
-                            reply: aiReply.trim(),
-                            products: foundProducts,
-                            timestamp: new Date().toISOString(),
-                        });
-                    }
-                } else {
-                    const errorData = await response.json();
-                    console.error("❌ Gemini API Error:", errorData);
-                    console.log("⚠️ مفتاح الذكاء الاصطناعي غير صالح، سيتم الانتقال لنظام البحث المحلي التلقائي.");
-                    // لن نقوم بإرجاع خطأ هنا، بل سندع الكود يكمل طريقه إلى الـ Fallback المحلي في الأسفل
+                if (aiReply) {
+                    return NextResponse.json({
+                        reply: aiReply.trim(),
+                        products: foundProducts,
+                        timestamp: new Date().toISOString(),
+                    });
                 }
             } catch (aiError) {
                 console.error("⚠️ Gemini API integration failed, falling back to local search:", aiError);

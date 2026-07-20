@@ -4,6 +4,7 @@ import connectToMongo from "@/lib/db";
 import Order from "@/model/Order";
 import Product from "@/model/Product";
 import { headers } from "next/headers";
+import { processOrderSuccess } from "@/lib/orderProcessor";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -42,7 +43,7 @@ export async function POST(req) {
 
                 // تحديث حالة الطلب إلى Paid
                 // نستخدم findOneAndUpdate مع status: "Pending" لمنع التكرار (Idempotency)
-                const order = await Order.findOneAndUpdate(
+                let order = await Order.findOneAndUpdate(
                     { _id: orderId, status: "Pending" },
                     {
                         $set: {
@@ -59,7 +60,7 @@ export async function POST(req) {
 
                 // إذا وجدنا الطلب وتم تحديثه (يعني أنه لم يُحدث من قبل)
                 if (order) {
-                    // 🚨 ملاحظة: تم إزالة كود خصم المخزون من هنا لأنه يتم حجزه مسبقاً في الـ Checkout لمنع الـ Overselling
+                    await processOrderSuccess(order);
                     console.log(`✅ تم تأكيد الطلب ${orderId} بنجاح عبر Webhook (المخزون محجوز مسبقاً).`);
                 } else {
                     console.log(`ℹ️ الطلب ${orderId} تم تأكيده مسبقاً.`);

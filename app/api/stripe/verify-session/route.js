@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import connectToMongo from "@/lib/db";
 import Order from "@/model/Order";
+import { processOrderSuccess } from "@/lib/orderProcessor";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -19,12 +20,13 @@ export async function GET(request) {
         // 📝 التعامل مع طلبات الدفع عند الاستلام (COD)
         if (session_id.startsWith("COD-")) {
             const orderId = session_id.split("COD-")[1];
-            const order = await Order.findByIdAndUpdate(
+            let order = await Order.findByIdAndUpdate(
                 orderId,
                 { $set: { paymentMethod: "COD" } },
                 { new: true }
             );
             if (order) {
+                await processOrderSuccess(order);
                 return NextResponse.json({ success: true });
             }
             return NextResponse.json({ success: false, message: "الطلب غير موجود" }, { status: 404 });
@@ -40,7 +42,7 @@ export async function GET(request) {
             const orderId = session.metadata?.orderId;
             if (orderId) {
                 // تحديث حالة الطلب وخصم المخزون مع ضمان عدم التكرار
-                const order = await Order.findOneAndUpdate(
+                let order = await Order.findOneAndUpdate(
                     { _id: orderId, status: "Pending" },
                     {
                         $set: {
@@ -56,8 +58,7 @@ export async function GET(request) {
                 );
 
                 if (order) {
-                    // ✅ المخزون تم خصمه مسبقاً بشكل ذري في الـ Checkout API عند إنشاء الجلسة
-                    // لا حاجة لخصمه مرة ثانية هنا لمنع الـ Double Deduction
+                    await processOrderSuccess(order);
                     console.log(`✅ تم تأكيد الطلب ${orderId} بنجاح عبر التحقق من الجلسة.`);
                 }
             }

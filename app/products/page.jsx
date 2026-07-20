@@ -12,6 +12,7 @@ export default function ProductPage() {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
+    const [maxPrice, setMaxPrice] = useState(10000);
     const [siteSettings, setSiteSettings] = useState({ siteName: "" });
 
     const categories = ['All', 'الإلكترونيات', 'الملابس والأزياء', 'المنزل والمطبخ', 'العطور والتجميل'];
@@ -47,8 +48,13 @@ export default function ProductPage() {
                 (product.category && product.category.toLowerCase().includes(searchQuery.toLowerCase()))
             );
         }
+        
+        if (maxPrice < 10000) {
+            filtered = filtered.filter(p => p.price <= maxPrice);
+        }
+
         setFilteredProducts(filtered);
-    }, [searchQuery, products, activeCategory]);
+    }, [searchQuery, products, activeCategory, maxPrice]);
 
     const fetchProducts = async () => {
         try {
@@ -150,8 +156,30 @@ export default function ProductPage() {
                 {/* Modern Sidebar */}
                 <aside className="lg:col-span-1 space-y-4">
                     <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-slate-200/50 dark:border-slate-800/50 sticky top-24">
+                        <div className="mb-8">
+                            <h2 className="text-sm font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                تصفية بالسعر
+                            </h2>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-xs font-bold text-slate-500">
+                                    <span>$0</span>
+                                    <span className="text-indigo-600 dark:text-indigo-400">${maxPrice >= 10000 ? "10000+" : maxPrice}</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="10000" 
+                                    step="50"
+                                    value={maxPrice} 
+                                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                                    className="w-full accent-indigo-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
+                        </div>
+
                         <h2 className="text-sm font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Package className="w-4 h-4 text-indigo-500" />
                             الأقسام الرئيسية
                         </h2>
                         <ul className="space-y-1.5 text-sm font-medium">
@@ -224,9 +252,15 @@ function ProductCard({ product }) {
             
             {/* Product Info */}
             <div className="p-5 flex flex-col flex-1 bg-white dark:bg-gray-900">
-                <h3 className="text-base font-black text-slate-900 dark:text-white line-clamp-1 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {product.title}
-                </h3>
+                <div className="flex justify-between items-start mb-1">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {product.title}
+                    </h3>
+                    <div className="flex items-center text-yellow-500 gap-0.5 text-xs font-bold bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded">
+                        <Star className="w-3 h-3 fill-yellow-500" />
+                        <span>{product.rating ? product.rating.toFixed(1) : "0.0"}</span>
+                    </div>
+                </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4 flex-1">
                     {product.description}
                 </p>

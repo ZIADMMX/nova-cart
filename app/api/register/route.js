@@ -3,6 +3,8 @@ import User from "@/model/User";
 import connectToMongo from "@/lib/db";
 import { createAuthCookie } from "@/lib/auth"; 
 import { rateLimit } from "@/lib/rateLimit"; // 🚨 حماية من هجمات البوتات
+import { sendWelcomeEmail } from "@/lib/email";
+
 export async function POST(request) {
     try {
         // 🚨 حماية ضد هجمات إنشاء الحسابات الوهمية (Spam/Bots)
@@ -39,6 +41,13 @@ export async function POST(request) {
         if (user) {
             // 5. زرع الكوكي الآمن في المتصفح تلقائياً (دالتك الجاهزة والمحترفة)
             await createAuthCookie(user._id.toString(), user.role);
+
+            // 📩 إرسال رسالة الترحيب
+            try {
+                await sendWelcomeEmail(user.email, user.name);
+            } catch (emailErr) {
+                console.error("Failed to send welcome email:", emailErr);
+            }
 
             // 6. إرجاع بيانات الحساب الجديد بنجاح للـ Frontend
             return NextResponse.json({

@@ -46,6 +46,12 @@ export default function CartProvider({ children }) {
       const maxStock = product.stock !== undefined ? product.stock : 99;
 
       if (existingItem) {
+        // Prevent adding more than 1 for digital products
+        if (product.productType === 'digital_file' || product.productType === 'license_key') {
+          alert("المنتجات الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
+          return prevCart;
+        }
+
         const newQuantity = existingItem.quantity + quantity;
         
         // إذا تخطت الكمية الجديدة المخزون المتاح، نثبتها عند الحد الأقصى للمخزون وننبه العميل
@@ -89,6 +95,10 @@ export default function CartProvider({ children }) {
     setCart((prevCart) =>
       prevCart.map((item) => {
         if (item._id === productId) {
+          if ((item.productType === 'digital_file' || item.productType === 'license_key') && quantity > 1) {
+             alert("المنتجات الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
+             return { ...item, quantity: 1 };
+          }
           const maxStock = item.stock !== undefined ? item.stock : 99;
           if (quantity > maxStock) {
             alert(`نعتذر، لا يمكنك تخطي المخزون المتاح (${maxStock} قطعة).`);
