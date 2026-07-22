@@ -5,7 +5,7 @@ import User from '@/model/User';
 import { getAuthFromCookie } from '@/lib/auth';
 import { rateLimit } from '@/lib/rateLimit';
 
-// 🚨 وظيفة أمنية: تنظيف المدخلات لمنع هجمات ReDoS 
+// 🚨 وظيفة أمنية: تنظيف المدخNoت لمنع هجمات ReDoS 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -15,7 +15,7 @@ export async function GET(request) {
     const ip = request.headers.get('x-forwarded-for') || request.ip || '127.0.0.1';
     const rateLimitResult = rateLimit(ip);
     if (!rateLimitResult.allowed) {
-      return NextResponse.json({ message: 'لقد تجاوزت الحد المسموح. يرجى الانتظار دقيقة.' }, { status: 429 });
+      return NextResponse.json({ message: 'لقد تجاوزت الحد المسموح. يرجى اNoنتظار دقيقة.' }, { status: 429 });
     }
 
     await connectDB();
@@ -41,7 +41,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("GET Products Error:", error);
     return NextResponse.json(
-      { message: 'حدث خطأ داخلي في الخادم' },
+      { message: 'حدث Error داخلي في الخادم' },
       { status: 500 }
     );
   }
@@ -52,7 +52,7 @@ export async function POST(request) {
     const ip = request.headers.get('x-forwarded-for') || request.ip || '127.0.0.1';
     const rateLimitResult = rateLimit(ip);
     if (!rateLimitResult.allowed) {
-      return NextResponse.json({ message: 'لقد تجاوزت الحد المسموح. يرجى الانتظار دقيقة.' }, { status: 429 });
+      return NextResponse.json({ message: 'لقد تجاوزت الحد المسموح. يرجى اNoنتظار دقيقة.' }, { status: 429 });
     }
 
     const auth = await getAuthFromCookie();
@@ -84,7 +84,7 @@ export async function POST(request) {
       isActive,
     } = await request.json();
 
-    // 🚨 التحقق من صحة البيانات الأساسية قبل الحفظ (Data Validation)
+    // 🚨 التحقق من صحة البيانات الأساسية قبل الSave (Data Validation)
     if (!title || typeof price !== 'number' || price < 0 || stock < 0) {
       return NextResponse.json({ message: "بيانات المنتج غير صالحة" }, { status: 400 });
     }
@@ -104,7 +104,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("POST Product Error:", error);
     return NextResponse.json(
-      { message: 'حدث خطأ أثناء إضافة المنتج، يرجى مراجعة البيانات المدخلة' },
+      { message: 'حدث Error أثناء إضافة المنتج، يرجى مراجعة البيانات المدخلة' },
       { status: 400 }
     );
   }

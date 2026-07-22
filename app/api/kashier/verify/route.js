@@ -11,7 +11,7 @@ export async function GET(request) {
         const merchantOrderId = searchParams.get("merchantOrderId");
 
         if (!paymentStatus || !signature || !merchantOrderId) {
-            return NextResponse.json({ success: false, message: "بيانات التحقق غير مكتملة" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "بيانات التحقق غير Completedة" }, { status: 400 });
         }
 
         const apiKey = process.env.KASHIER_SECRET_KEY || process.env.KASHIER_API_KEY;
@@ -19,7 +19,7 @@ export async function GET(request) {
             return NextResponse.json({ success: false, message: "مفتاح API/السر الخاص بكاشير غير مهيأ" }, { status: 500 });
         }
 
-        // تحضير البيانات لحساب التوقيع الرقمي ومطابقته لمنع التلاعب
+        // تحضير البيانات لحساب التوقيع الرقمي ومطابقته لمنع التNoعب
         const queryObj = Object.fromEntries(searchParams.entries());
         
         const getVal = (key) => {
@@ -51,12 +51,12 @@ export async function GET(request) {
         }
 
         if (paymentStatus !== "SUCCESS") {
-            return NextResponse.json({ success: false, message: "عملية الدفع لم تكتمل بنجاح" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "عملية Checkout لم تكتمل بSuccess" }, { status: 400 });
         }
 
         await connectToMongo();
 
-        // تحديث حالة الطلب في قاعدة البيانات وتخزين معلومات المعاملة
+        // تحديث Order Status في قاعدة البيانات وتخزين معلومات المعاملة
         const order = await Order.findOneAndUpdate(
             { _id: merchantOrderId, status: "Pending" },
             {
@@ -73,11 +73,11 @@ export async function GET(request) {
         );
 
         if (order) {
-            console.log(`✅ تم تأكيد ودفع الطلب ${merchantOrderId} بنجاح عبر كاشير.`);
+            console.log(`✅ تم تأكيد ودفع الطلب ${merchantOrderId} بSuccess عبر كاشير.`);
             return NextResponse.json({ success: true });
         }
 
-        // إذا كان الطلب قد تم تأكيده بالفعل من قبل (مثلاً لو أعاد العميل تحميل الصفحة)
+        // إذا كان الطلب قد تم تأكيده بالفعل من قبل (مثNoً لو أعاد العميل Loading الصفحة)
         const existingOrder = await Order.findById(merchantOrderId);
         if (existingOrder && existingOrder.status === "Paid") {
             return NextResponse.json({ success: true });
@@ -86,7 +86,7 @@ export async function GET(request) {
         return NextResponse.json({ success: false, message: "الطلب غير موجود أو تمت معالجته بالفعل" }, { status: 404 });
 
     } catch (error) {
-        console.error("❌ خطأ أثناء التحقق من دفع كاشير:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ داخلي في الخادم" }, { status: 500 });
+        console.error("❌ Error أثناء التحقق من دفع كاشير:", error);
+        return NextResponse.json({ success: false, message: "حدث Error داخلي في الخادم" }, { status: 500 });
     }
 }

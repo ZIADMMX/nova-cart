@@ -13,7 +13,7 @@ export async function GET(request) {
             return NextResponse.json({ message: "غير مصرح لك للوصول للإحصائيات" }, { status: 403 });
         }
 
-        // 2. Database Connection (قاعدة البيانات): الاتصال الفعلي بالبيانات
+        // 2. Database Connection (قاعدة البيانات): اNoتصال الفعلي بالبيانات
         await connectToMongo();
 
         // 3. Data Gathering (جمع الأرقام): نستخدم Promise.all لجلب البيانات في نفس اللحظة لتسريع السيرفر
@@ -21,9 +21,9 @@ export async function GET(request) {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         const [totalUsers, totalProducts, totalOrders, newUsersData] = await Promise.all([
-            User.countDocuments({ role: { $ne: "admin" } }), // نعد المستخدمين (باستثناء الأدمن)
-            Product.countDocuments(), // نعد جميع المنتجات
-            Order.countDocuments(),    // نعد جميع الطلبات
+            User.countDocuments({ role: { $ne: "admin" } }), // نعد Users (باستثناء الأدمن)
+            Product.countDocuments(), // نعد جميع Products
+            Order.countDocuments(),    // نعد جميع Orders
             User.aggregate([
                 {
                     $match: {
@@ -53,7 +53,7 @@ export async function GET(request) {
                 $group: {
                     _id: null,
                     total: { $sum: "$totalPrice" },
-                    count: { $sum: 1 } // لحساب عدد الطلبات المكتملة
+                    count: { $sum: 1 } // لحساب عدد Orders الCompletedة
                 }
             }
         ]);
@@ -62,30 +62,30 @@ export async function GET(request) {
         const successfulOrdersCount = revenueResult[0]?.count || 0;
         const averageOrderValue = successfulOrdersCount > 0 ? (totalRevenue / successfulOrdersCount) : 0;
 
-        // جلب الطلبات المعلقة (التي لم يتم دفعها أو تأكيدها بعد)
+        // جلب Orders المعلقة (التي لم يتم دفعها أو تأكيدها بعد)
         const totalPendingOrders = await Order.countDocuments({ status: "Pending" });
 
-        // 5. Recent Orders (أحدث الطلبات): نجلب آخر 5 طلبات فقط لجدول لوحة التحكم
+        // 5. Recent Orders (أحدث Orders): نجلب آخر 5 طلبات فقط لجدول Dashboard
         const recentOrders = await Order.find({})
-            .sort({ createdAt: -1 }) // الترتيب تنازلياً (الأحدث أولاً)
+            .sort({ createdAt: -1 }) // الترتيب تنازلياً (الأحدث أوNoً)
             .limit(5)                // 5 طلبات فقط
             .populate("user", "name email"); // نجلب اسم واسم مستخدم المشتري لعرضه
 
-        // 6. Low Stock Alerts (تنبيهات نقص المخزون): جلب المنتجات التي قاربت على النفاذ (WOW Factor)
+        // 6. Low Stock Alerts (تنبيهات نقص المخزون): جلب Products التي قاربت على النفاذ (WOW Factor)
         const lowStockProducts = await Product.find({ stock: { $lte: 5, $gte: 0 } })
             .select("title stock imageUrl")
             .sort({ stock: 1 })
             .limit(5)
             .lean();
 
-        // 7. Recent Customers (أحدث العملاء):
+        // 7. Recent Customers (أحدث العمNoء):
         const recentUsers = await User.find({ role: { $ne: "admin" } })
             .select("name email createdAt")
             .sort({ createdAt: -1 })
             .limit(4)
             .lean();
 
-        // 8. Response (إرسال النتيجة): نجمع البيانات في كائن واحد (Object) ونرسله للوحة التحكم
+        // 8. Response (إرسال النتيجة): نجمع البيانات في كائن واحد (Object) ونرسله لDashboard
         return NextResponse.json({
             totalUsers,
             totalProducts,
@@ -101,6 +101,6 @@ export async function GET(request) {
 
     } catch (error) {
         console.error("Stats API Error:", error);
-        return NextResponse.json({ message: "حدث خطأ داخلي في السيرفر" }, { status: 500 });
+        return NextResponse.json({ message: "حدث Error داخلي في السيرفر" }, { status: 500 });
     }
 }

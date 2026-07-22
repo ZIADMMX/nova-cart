@@ -7,7 +7,7 @@ const titleMap = {
     info: "إشعار جديد",
     success: "عملية ناجحة",
     warning: "تنبيه هام",
-    error: "خطأ في النظام",
+    error: "Error في النظام",
     order: "تحديث الطلب",
     product: "تحديث المنتج",
     alert: "تنبيه"
@@ -38,6 +38,6 @@ export async function GET(request) {
         return NextResponse.json(formattedNotifications);
     } catch (error) {
         console.error("Error fetching notifications:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم" }, { status: 500 });
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم" }, { status: 500 });
     }
 }

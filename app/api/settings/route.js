@@ -3,7 +3,7 @@ import connectToMongo from "@/lib/db";
 import SiteSettings from "@/model/SiteSettings";
 import { getAuthFromCookie } from "@/lib/auth";
 
-// GET - عام: يجلب الإعدادات لأي زائر (للاستخدام في الـ Footer)
+// GET - عام: يجلب Settings لأي زائر (لNoستخدام في الـ Footer)
 export async function GET() {
     try {
         await connectToMongo();
@@ -22,17 +22,17 @@ export async function GET() {
             tiktok: settings.tiktok || "",
         });
     } catch (error) {
-        console.error("❌ خطأ في جلب الإعدادات:", error);
+        console.error("❌ Error في جلب Settings:", error);
         return NextResponse.json({ facebook: "", instagram: "", tiktok: "" });
     }
 }
 
-// PUT - محمي: تحديث الإعدادات من قِبَل الأدمن فقط
+// PUT - محمي: تحديث Settings من قِبَل الأدمن فقط
 export async function PUT(req) {
     try {
         const auth = await getAuthFromCookie();
         if (!auth || !["admin", "super_admin"].includes(auth.role)) {
-            return NextResponse.json({ success: false, message: "غير مصرح لك بتعديل الإعدادات" }, { status: 403 });
+            return NextResponse.json({ success: false, message: "غير مصرح لك بEdit Settings" }, { status: 403 });
         }
 
         const { siteName, siteDescription, logoUrl, faviconUrl, facebook, instagram, tiktok } = await req.json();
@@ -56,7 +56,7 @@ export async function PUT(req) {
 
         return NextResponse.json({ success: true, settings });
     } catch (error) {
-        console.error("❌ خطأ في تحديث الإعدادات:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم" }, { status: 500 });
+        console.error("❌ Error في تحديث Settings:", error);
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم" }, { status: 500 });
     }
 }

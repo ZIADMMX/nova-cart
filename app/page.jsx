@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import ProductCard from "@/components/UI/prouduct";
+import ProductCard from "@/components/UI/product";
 import { HeroAuthButton, CtaAuthButton } from "@/components/UI/StorefrontAuthButtons";
 import connectToMongo from "@/lib/db";
 import Product from "@/model/Product";
@@ -18,6 +18,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import Script from "next/script";
+import { formatPrice } from "@/lib/formatPrice";
 
 // --- Server Data Fetching ---
 async function getStoreData() {
@@ -161,13 +162,20 @@ export default async function Home() {
                                 </div>
                                 <div className="text-left">
                                     <h3 className="text-sm font-semibold text-white">
-                                        Secure Payments by <span className="text-indigo-400 font-bold">Stripe</span>
+                                        Trusted <span className="text-indigo-400 font-bold">Payment Gateways</span>
                                     </h3>
                                     <p className="text-xs text-slate-400 mt-0.5">100% Encrypted & Protected Transactions</p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
+                <div className="rounded-2xl border border-amber-200/70 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+                    <span className="font-black">السعر المعروض: </span>
+                    جميع الأسعار بالعملة المحلية بالجنيه المصري (ج.م) مع عرض واضح للمنتج وسياسة الاستبدال والاسترجاع.
                 </div>
             </section>
 
@@ -185,7 +193,7 @@ export default async function Home() {
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                         {[
-                            { icon: <CreditCard className="w-6 h-6 text-indigo-400" />, title: "Secure Payments", description: "Every checkout transaction is processed securely through Stripe integration." },
+                            { icon: <CreditCard className="w-6 h-6 text-indigo-400" />, title: "Secure Payments", description: "Every checkout transaction is processed securely through trusted payment providers." },
                             { icon: <Zap className="w-6 h-6 text-amber-400" />, title: "Instant Delivery", description: "Gain access to your purchases and shipping updates instantly without delay." },
                             { icon: <Shield className="w-6 h-6 text-emerald-400" />, title: "Quality Guarantee", description: "All products are sourced directly from verified manufacturers for authenticity." },
                             { icon: <Headphones className="w-6 h-6 text-purple-400" />, title: "24/7 Dedicated Support", description: "Our team of customer support experts is always here to assist with any queries." },
@@ -310,7 +318,7 @@ export default async function Home() {
                             <p className="text-slate-400 text-sm leading-relaxed mb-6">
                                 {siteSettings.siteDescription || "Elevate your shopping experience. Discover curated, premium products delivered with unparalleled speed and reliability."}
                             </p>
-                            {/* روابط التواصل الاجتماعي - تُحدَّث من لوحة التحكم */}
+                            {/* روابط التواصل اNoجتماعي - تُحدَّث من Dashboard */}
                             <div className="flex items-center gap-3">
                                 {siteSettings.facebook && (
                                     <a href={siteSettings.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
@@ -352,7 +360,6 @@ export default async function Home() {
                                 <li><Link href="/orders" className="text-sm text-slate-400 hover:text-indigo-400 transition-colors duration-200 flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> My Orders</Link></li>
                                 <li><Link href="/notifications" className="text-sm text-slate-400 hover:text-indigo-400 transition-colors duration-200 flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> Notifications</Link></li>
                                 <li><Link href="/profile" className="text-sm text-slate-400 hover:text-indigo-400 transition-colors duration-200 flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> My Profile</Link></li>
-                                <li><Link href="/chat" className="text-sm text-slate-400 hover:text-indigo-400 transition-colors duration-200 flex items-center gap-2"><ArrowRight className="w-3.5 h-3.5" /> AI Assistant</Link></li>
                             </ul>
                         </div>
 

@@ -29,7 +29,7 @@ export default function BuyButton({ productId }) {
             ) : (
                 <>
                     <ShoppingCart className="w-5 h-5" />
-                    <span>شراء الآن</span>
+                    <span>Buy Now</span>
                 </>
             )}
         </button>

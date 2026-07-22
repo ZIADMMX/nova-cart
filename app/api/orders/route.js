@@ -11,10 +11,10 @@ export async function GET(request) {
             return NextResponse.json({ success: false, message: "غير مصرح لك بزيارة هذه الصفحة" }, { status: 401 });
         }
         
-        // 2. الاتصال بقاعدة البيانات
+        // 2. اNoتصال بقاعدة البيانات
         await connectToMongo();
         
-        // 3. جلب الطلبات التابعة للمستخدم مرتبة من الأحدث للأقدم
+        // 3. جلب Orders التابعة للمستخدم مرتبة من الأحدث للأقدم
         const orders = await Order.find({ 
             user: auth.userId,
             $or: [
@@ -37,7 +37,7 @@ export async function GET(request) {
             }
         );
     } catch (err) {
-        console.error("❌ خطأ أثناء جلب الطلبات: ", err);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم الداخلي" }, { status: 500 });
+        console.error("❌ Error أثناء جلب Orders: ", err);
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم الداخلي" }, { status: 500 });
     }
 }

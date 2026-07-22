@@ -6,15 +6,16 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useCart } from "@/components/providers/CartProvider";
 import { Loader2, ArrowRight, ShieldCheck, Truck, CreditCard, DollarSign } from "lucide-react";
 import Image from "next/image";
+import { formatPrice } from "@/lib/formatPrice";
 
 // قائمة محافظات مصر للتسهيل والتنظيم
 const EGYPT_GOVERNORATES = [
-    "القاهرة", "الجيزة", "الإسكندرية", "القليوبية", "الدقهلية", 
-    "الشرقية", "المنوفية", "الغربية", "البحيرة", "دمياط", 
-    "بورسعيد", "الإسماعيلية", "السويس", "كفر الشيخ", "الفيوم", 
-    "بني سويف", "المنيا", "أسيوط", "سوهاج", "قنا", 
-    "الأقصر", "أسوان", "البحر الأحمر", "الوادي الجديد", "مطروح", 
-    "شمال سيناء", "جنوب سيناء"
+    "Cairo", "Giza", "Alexandria", "Qalyubia", "Dakahlia", 
+    "Sharqia", "Monufia", "Gharbia", "Beheira", "Damietta", 
+    "Port Said", "Ismailia", "Suez", "Kafr El Sheikh", "Faiyum", 
+    "Beni Suef", "Minya", "Asyut", "Sohag", "Qena", 
+    "Luxor", "Aswan", "Red Sea", "New Valley", "Matrouh", 
+    "North Sinai", "South Sinai"
 ];
 
 function CheckoutContent() {
@@ -29,7 +30,7 @@ function CheckoutContent() {
     const [loadingItems, setLoadingItems] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     
-    // بيانات الشحن
+    // بيانات الShipping
     const [shippingForm, setShippingForm] = useState({
         fullName: "",
         phone: "",
@@ -39,7 +40,7 @@ function CheckoutContent() {
         postalCode: ""
     });
     
-    const [paymentMethod, setPaymentMethod] = useState("COD"); // COD أو Card
+    const [paymentMethod, setPaymentMethod] = useState("COD"); // COD أو Kashier
     const [errorMsg, setErrorMsg] = useState("");
 
     // حماية المسار
@@ -49,7 +50,7 @@ function CheckoutContent() {
         }
     }, [isAuthenticated, authLoading, router]);
 
-    // جلب بيانات المنتجات المراد شراؤها
+    // جلب بيانات Products المراد شراؤها
     useEffect(() => {
         if (productId) {
             // شراء منتج واحد مباشرة
@@ -107,15 +108,15 @@ function CheckoutContent() {
         e.preventDefault();
         setErrorMsg("");
         
-        // التحقق من صحة المدخلات
-        if (!shippingForm.fullName.trim()) return setErrorMsg("يرجى إدخال الاسم بالكامل");
-        if (!shippingForm.phone.trim()) return setErrorMsg("يرجى إدخال رقم الهاتف");
+        // التحقق من صحة المدخNoت
+        if (!shippingForm.fullName.trim()) return setErrorMsg("Please enter your full name");
+        if (!shippingForm.phone.trim()) return setErrorMsg("Please enter your phone number");
         if (!/^01[0125][0-9]{8}$/.test(shippingForm.phone.trim())) {
-            return setErrorMsg("يرجى إدخال رقم هاتف مصري صحيح (مثال: 01012345678)");
+            return setErrorMsg("Please enter a valid phone number (e.g., 01012345678)");
         }
-        if (!shippingForm.city) return setErrorMsg("يرجى اختيار المحافظة");
-        if (!shippingForm.streetName.trim()) return setErrorMsg("يرجى إدخال اسم الشارع");
-        if (!shippingForm.address.trim()) return setErrorMsg("يرجى إدخال تفاصيل العنوان (عمارة/شقة)");
+        if (!shippingForm.city) return setErrorMsg("Please select a governorate");
+        if (!shippingForm.streetName.trim()) return setErrorMsg("Please enter the street name");
+        if (!shippingForm.address.trim()) return setErrorMsg("Please enter address details (building/apartment)");
 
         setSubmitting(true);
 
@@ -135,17 +136,17 @@ function CheckoutContent() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "حدث خطأ غير متوقع أثناء معالجة طلبك.");
+                throw new Error(data.error || "An unexpected error occurred while processing your order.");
             }
 
             if (data.url) {
-                // إذا تم الدفع عند الاستلام أو نجحت جلسة الدفع
+                // إذا تم Cash on Delivery أو نجحت جلسة Checkout
                 if (paymentMethod === "COD") {
-                    clearCart(); // تفريغ السلة بعد الدفع عند الاستلام الناجح
+                    clearCart(); // تفريغ السلة بعد Cash on Delivery الناجح
                 }
                 window.location.href = data.url;
             } else {
-                throw new Error("لم يتم تلقي رابط المعالجة.");
+                throw new Error("Processing link not received.");
             }
 
         } catch (error) {
@@ -159,7 +160,7 @@ function CheckoutContent() {
         return (
             <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col items-center justify-center">
                 <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">جاري تحميل تفاصيل الطلب...</p>
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Loading Order Details...</p>
             </div>
         );
     }
@@ -170,9 +171,9 @@ function CheckoutContent() {
         return (
             <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col items-center justify-center p-4">
                 <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full text-center">
-                    <p className="text-slate-600 dark:text-slate-400 font-bold mb-6">سلتك فارغة أو لم تقم باختيار أي منتجات لشراءها.</p>
+                    <p className="text-slate-600 dark:text-slate-400 font-bold mb-6">Your cart is empty or you haven't selected any products to buy.</p>
                     <button onClick={() => router.push("/products")} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
-                        تصفح المنتجات
+                        Browse Products
                     </button>
                 </div>
             </div>
@@ -187,21 +188,21 @@ function CheckoutContent() {
                     onClick={() => router.back()} 
                     className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 mb-8 transition-colors"
                 >
-                    <ArrowRight className="w-4 h-4" /> العودة للتسوق
+                    <ArrowRight className="w-4 h-4" /> Back to Shopping
                 </button>
 
-                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-10">إتمام الشراء والدفع</h1>
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-10">Checkout & Complete Purchase</h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     
-                    {/* فورم الشحن والدفع */}
+                    {/* فورم الShipping وCheckout */}
                     <div className="lg:col-span-7 space-y-6">
                         <form onSubmit={handleSubmitOrder} className="bg-white dark:bg-gray-900 p-6 md:p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-6">
                             <div>
                                 <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-                                    <Truck className="w-5 h-5 text-indigo-600" /> تفاصيل عنوان الشحن
+                                    <Truck className="w-5 h-5 text-indigo-600" /> Shipping Address Details
                                 </h2>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">يرجى إدخال بياناتك بشكل صحيح لضمان تسليم المنتج بأسرع وقت.</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Please enter your details correctly to ensure the fastest delivery.</p>
                             </div>
 
                             {errorMsg && (
@@ -212,11 +213,11 @@ function CheckoutContent() {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">الاسم بالكامل</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Full Name</label>
                                     <input 
                                         type="text" 
                                         name="fullName"
-                                        placeholder="الاسم الثلاثي أو الثنائي"
+                                        placeholder="Full Name (First and Last)"
                                         value={shippingForm.fullName}
                                         onChange={handleInputChange}
                                         className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold"
@@ -225,11 +226,11 @@ function CheckoutContent() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">رقم الموبايل</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Mobile Number</label>
                                         <input 
                                             type="tel" 
                                             name="phone"
-                                            placeholder="رقم الهاتف للتوصيل"
+                                            placeholder="Delivery Phone Number"
                                             value={shippingForm.phone}
                                             onChange={handleInputChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold"
@@ -237,13 +238,13 @@ function CheckoutContent() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">المحافظة</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Governorate</label>
                                         <select 
                                             value={shippingForm.city}
                                             onChange={handleSelectCity}
                                             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold"
                                         >
-                                            <option value="">اختر المحافظة</option>
+                                            <option value="">اختر Governorate</option>
                                             {EGYPT_GOVERNORATES.map(gov => (
                                                 <option key={gov} value={gov}>{gov}</option>
                                             ))}
@@ -253,11 +254,11 @@ function CheckoutContent() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">اسم الشارع</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Street Name</label>
                                         <input 
                                             type="text" 
                                             name="streetName"
-                                            placeholder="مثال: شارع البطل أحمد عبد العزيز"
+                                            placeholder="e.g., Main Street"
                                             value={shippingForm.streetName}
                                             onChange={handleInputChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold"
@@ -265,11 +266,11 @@ function CheckoutContent() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">تفاصيل العنوان (عمارة / دور / شقة)</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Address Details (Building / Floor / Apt)</label>
                                         <input 
                                             type="text" 
                                             name="address"
-                                            placeholder="مثال: عمارة 12، الدور الثالث، شقة 5"
+                                            placeholder="e.g., Building 12, Floor 3, Apt 5"
                                             value={shippingForm.address}
                                             onChange={handleInputChange}
                                             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold"
@@ -278,10 +279,10 @@ function CheckoutContent() {
                                 </div>
                             </div>
 
-                            {/* طريقة الدفع */}
+                            {/* Payment Method */}
                             <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
                                 <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
-                                    <CreditCard className="w-5 h-5 text-indigo-600" /> اختر طريقة الدفع
+                                    <CreditCard className="w-5 h-5 text-indigo-600" /> Select Payment Method
                                 </h2>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,14 +305,14 @@ function CheckoutContent() {
                                             <DollarSign className="w-5 h-5 text-green-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white">الدفع عند الاستلام</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">ادفع نقداً عند استلام المنتج</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">Cash on Delivery</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Pay in cash when you receive the product</p>
                                         </div>
                                     </label>
 
                                     <label 
                                         className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                                            paymentMethod === "Card" 
+                                            paymentMethod === "Kashier" 
                                             ? "border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20" 
                                             : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                                         }`}
@@ -319,17 +320,17 @@ function CheckoutContent() {
                                         <input 
                                             type="radio" 
                                             name="paymentMethod" 
-                                            value="Card" 
-                                            checked={paymentMethod === "Card"} 
-                                            onChange={() => setPaymentMethod("Card")}
+                                            value="Kashier" 
+                                            checked={paymentMethod === "Kashier"} 
+                                            onChange={() => setPaymentMethod("Kashier")}
                                             className="hidden"
                                         />
                                         <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center shrink-0">
                                             <CreditCard className="w-5 h-5 text-indigo-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white">بطاقة ائتمان / فيزا</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">الدفع آمن ومحمي بالكامل</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">Kashier (Visa/Mastercard)</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Secure checkout through Kashier payment gateway</p>
                                         </div>
                                     </label>
                                 </div>
@@ -343,11 +344,11 @@ function CheckoutContent() {
                                 {submitting ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span>جاري تأكيد وتسجيل الطلب...</span>
+                                        <span>Confirming and placing order...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>تأكيد وشراء الطلب بقيمة ${totalToPay.toFixed(2)}</span>
+                                        <span>Confirm and buy order for {formatPrice(totalToPay, "EGP")}</span>
                                     </>
                                 )}
                             </button>
@@ -357,7 +358,7 @@ function CheckoutContent() {
                     {/* ملخص الطلب */}
                     <div className="lg:col-span-5 space-y-6">
                         <div className="bg-white dark:bg-gray-900 p-6 md:p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-6">
-                            <h2 className="text-lg font-black text-slate-900 dark:text-white">ملخص طلبك</h2>
+                            <h2 className="text-lg font-black text-slate-900 dark:text-white">Order Summary</h2>
 
                             <div className="divide-y divide-slate-100 dark:divide-slate-800 overflow-y-auto max-h-[300px] pr-2">
                                 {purchaseItems.map((item, idx) => (
@@ -374,8 +375,8 @@ function CheckoutContent() {
                                         <div className="flex-1 flex flex-col justify-between">
                                             <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">{item.title}</h3>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs text-slate-500 dark:text-slate-400">الكمية: {item.quantity}</span>
-                                                <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">${item.price}</span>
+                                                <span className="text-xs text-slate-500 dark:text-slate-400">Quantity: {item.quantity}</span>
+                                                <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">{formatPrice(item.price, "EGP")}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -384,15 +385,15 @@ function CheckoutContent() {
 
                             <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
                                 <div className="flex justify-between text-sm font-bold text-slate-500 dark:text-slate-400">
-                                    <span>المجموع الفرعي</span>
+                                    <span>Subtotal</span>
                                     <span>${totalToPay.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm font-bold text-slate-500 dark:text-slate-400">
-                                    <span>مصاريف الشحن</span>
-                                    <span className="text-green-600 dark:text-green-400">مجانًا</span>
+                                    <span>Shipping Fees</span>
+                                    <span className="text-green-600 dark:text-green-400">Free</span>
                                 </div>
                                 <div className="flex justify-between text-lg font-black text-slate-900 dark:text-white pt-3 border-t border-slate-100 dark:border-slate-800">
-                                    <span>المجموع الكلي</span>
+                                    <span>Total</span>
                                     <span>${totalToPay.toFixed(2)}</span>
                                 </div>
                             </div>
@@ -401,8 +402,8 @@ function CheckoutContent() {
                         <div className="bg-slate-100 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 flex gap-4 items-start">
                             <ShieldCheck className="w-6 h-6 text-indigo-600 shrink-0" />
                             <div>
-                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">تسوق آمن ومضمون 100%</h4>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">نحن نضمن حماية جميع بياناتك المالية والشخصية باستخدام تشفير SSL المتقدم.</p>
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">100% Safe & Secure Shopping</h4>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">We ensure the protection of all your financial and personal data using advanced SSL encryption.</p>
                             </div>
                         </div>
                     </div>
@@ -418,7 +419,7 @@ export default function CheckoutPage() {
         <Suspense fallback={
             <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col items-center justify-center">
                 <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">جاري تحميل الصفحة...</p>
+                <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Loading Page...</p>
             </div>
         }>
             <CheckoutContent />

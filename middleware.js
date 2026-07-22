@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { getJwtSecret } from "@/lib/auth";
 
 const protectedRoutes = ["/profile", "/cart", "/checkout", "/notifications", "/orders", "/order", "/chat"];
 const adminRoutes = ["/admin", "/dashboard"];
-const superAdminRoutes = ["/superadmin"]; 
-const authPaths = ["/auth/login", "/auth/register", "/auth/forget-password", "/auth/reset-password"]; 
+const superAdminRoutes = ["/superadmin"];
+const authPaths = ["/auth/login", "/auth/register", "/auth/forget-password", "/auth/reset-password"];
 
 // 🛠️ تحسين الأداء: تهيئة الـ Secret مرة واحدة خارج الدالة لكي لا يستهلك السيرفر مع كل Request
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+const secret = new TextEncoder().encode(getJwtSecret());
 
 export default async function authMiddleware(req) {
     const { pathname } = req.nextUrl;
@@ -83,4 +84,4 @@ export const config = {
         // 🛠️ إضافة مسارات الـ API لتطبيق الـ Headers عليها 
         '/api/:path*',
     ]
-};
+};

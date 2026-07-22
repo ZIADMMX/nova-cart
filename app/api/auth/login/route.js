@@ -10,28 +10,28 @@ export async function POST(request) {
         const ip = request.headers.get('x-forwarded-for') || request.ip || '127.0.0.1';
         const rateLimitResult = rateLimit(ip);
         if (!rateLimitResult.allowed) {
-            return NextResponse.json({ success: false, message: 'لقد تجاوزت عدد المحاولات المسموحة. يرجى المحاولة لاحقاً.' }, { status: 429 });
+            return NextResponse.json({ success: false, message: 'لقد تجاوزت عدد المحاوNoت المسموحة. يرجى المحاولة Noحقاً.' }, { status: 429 });
         }
 
-        // 1. استقبال البيانات وتأمين الاتصال بقاعدة البيانات
+        // 1. استقبال البيانات وتأمين اNoتصال بقاعدة البيانات
         const { email, password } = await request.json();
         
         if (!email || !password) {
-            return NextResponse.json({ success: false, message: "البريد الإلكتروني وكلمة المرور مطلوبان" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "Email وPassword مطلوبان" }, { status: 400 });
         }
 
         await connectToMongo(); // استخدام الدالة الموحدة والمحمية بالكاش
          
-        // 2. البحث عن المستخدم (ونجلب حقل الـ password يدوياً لأنه محجوب بـ select: false)
+        // 2. الSearch عن المستخدم (ونجلب حقل الـ password يدوياً لأنه محجوب بـ select: false)
         const user = await User.findOne({ email }).select("+password");
 
-        // 3. التحقق من وجود المستخدم ومطابقة كلمة المرور المشفرة (تم إصلاح اسم الدالة لـ comparePassword)
+        // 3. التحقق من وجود المستخدم ومطابقة Password المشفرة (تم إصNoح اسم الدالة لـ comparePassword)
         if (user && (await user.comparePassword(password))) {
             
             // 4. زرع الكوكي الآمن في المتصفح تلقائياً (دالتك الجاهزة من ملف auth)
             await createAuthCookie(user._id.toString(), user.role);
 
-            // 5. إرجاع بيانات المستخدم للـ Frontend (بدون كلمة المرور بالتأكيد!)
+            // 5. إرجاع بيانات المستخدم للـ Frontend (بدون Password بالتأكيد!)
             return NextResponse.json({
                 success: true,
                 _id: user._id,  
@@ -42,11 +42,11 @@ export async function POST(request) {
             
         } else {
             // أمنياً: يفضل دائماً قول "إيميل أو كلمة مرور خاطئة" دون تحديد أيهما الخاطئ لحماية الحسابات من التخمين
-            return NextResponse.json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" }, { status: 401 });
+            return NextResponse.json({ success: false, message: "Email أو Password غير صحيحة" }, { status: 401 });
         } 
 
     } catch (err) {
-        console.error("❌ خطأ أثناء تسجيل الدخول: ", err);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم الداخلي" }, { status: 500 });
+        console.error("❌ Error أثناء Sign In: ", err);
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم الداخلي" }, { status: 500 });
     }
 }

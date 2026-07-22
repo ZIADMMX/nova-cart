@@ -5,13 +5,13 @@ import connectToMongo from "@/lib/db";
 
 export async function GET(request) {
     try {
-        // 1. التحقق من هوية وصلاحية المستخدم (أدمن فقط)
+        // 1. التحقق من هوية وصNoحية المستخدم (أدمن فقط)
         const auth = await getAuthFromCookie();
         if (!auth || (auth.role !== "admin" && auth.role !== "super_admin")) {
             return NextResponse.json({ success: false, message: "غير مصرح لك بالوصول" }, { status: 403 });
         }
 
-        // 2. الاتصال بقاعدة البيانات
+        // 2. اNoتصال بقاعدة البيانات
         await connectToMongo();
 
         const { searchParams } = new URL(request.url);
@@ -38,7 +38,7 @@ export async function GET(request) {
             });
         }
 
-        // 3. جلب جميع الطلبات مع تفاصيل المستخدم المشتري
+        // 3. جلب جميع Orders مع تفاصيل المستخدم المشتري
         const orders = await Order.find({})
             .populate("user", "name email")
             .sort({ createdAt: -1 })
@@ -46,7 +46,7 @@ export async function GET(request) {
 
         return NextResponse.json(orders);
     } catch (err) {
-        console.error("❌ خطأ أثناء جلب جميع الطلبات للأدمن: ", err);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم الداخلي" }, { status: 500 });
+        console.error("❌ Error أثناء جلب جميع Orders للأدمن: ", err);
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم الداخلي" }, { status: 500 });
     }
 }

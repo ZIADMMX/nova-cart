@@ -34,7 +34,7 @@ export async function PUT(request) {
         return NextResponse.json({ success: true, user: updatedUser });
 
     } catch (err) {
-        console.error("❌ خطأ أثناء تحديث بيانات المستخدم: ", err);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم" }, { status: 500 });
+        console.error("❌ Error أثناء تحديث بيانات المستخدم: ", err);
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم" }, { status: 500 });
     }
 }

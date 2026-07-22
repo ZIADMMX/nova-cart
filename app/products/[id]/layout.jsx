@@ -2,11 +2,11 @@ import Product from "@/model/Product";
 import connectToMongo from "@/lib/db";
 import mongoose from "mongoose";
 
-// دالة مدمجة في Next.js لإنشاء الـ Metadata ديناميكياً قبل تحميل الصفحة في المتصفح
+// دالة مدمجة في Next.js لإنشاء الـ Metadata ديناميكياً قبل Loading الصفحة في المتصفح
 export async function generateMetadata({ params }) {
     const { id } = await params;
 
-    // التحقق من صحة المعرف حتى لا ينهار السيرفر
+    // التحقق من صحة المعرف حتى No ينهار السيرفر
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return { title: 'منتج غير صالح' };
     }
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }) {
     }
 }
 
-// هذه الـ Layout مجرد وعاء لتمرير الـ Metadata ولا تؤثر على الـ page.jsx (Client Component)
+// هذه الـ Layout مجرد وعاء لتمرير الـ Metadata وNo تؤثر على الـ page.jsx (Client Component)
 export default function ProductLayout({ children }) {
     return <>{children}</>;
 }

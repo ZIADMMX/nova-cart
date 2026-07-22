@@ -16,7 +16,7 @@ export async function GET(request) {
             return NextResponse.json({message:"no user found"} , {status: 404});
         }  
         } catch (err) {
-            console.error("❌ خطأ أثناء جلب بيانات المستخدم: ", err);
-            return NextResponse.json({ success: false, message: "حدث خطأ في الخادم الداخلي" }, { status: 500});
+            console.error("❌ Error أثناء جلب بيانات المستخدم: ", err);
+            return NextResponse.json({ success: false, message: "حدث Error في الخادم الداخلي" }, { status: 500});
         } 
 } 

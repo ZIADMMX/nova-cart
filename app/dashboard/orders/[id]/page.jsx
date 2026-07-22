@@ -43,7 +43,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
         }
     }, [isAuthenticated, authLoading, authUser, router]);
 
-    // جلب تفاصيل الطلب
+    // جلب Order Details
     const fetchOrderDetails = async () => {
         try {
             setLoading(true);
@@ -52,11 +52,11 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
             if (data.success) {
                 setOrder(data.order);
             } else {
-                setError(data.message || "فشل في تحميل تفاصيل الطلب.");
+                setError(data.message || "Failed to load Order Details.");
             }
         } catch (err) {
             console.error(err);
-            setError("حدث خطأ غير متوقع أثناء الاتصال بالخادم.");
+            setError("An unexpected error occurred while connecting to the server.");
         } finally {
             setLoading(false);
         }
@@ -68,7 +68,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
         }
     }, [orderId, isAuthenticated, authUser]);
 
-    // تحديث حالة الطلب
+    // تحديث Order Status
     const handleUpdateStatus = async (newStatus) => {
         try {
             setUpdatingStatus(true);
@@ -83,11 +83,11 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
             if (data.success) {
                 setOrder(prev => ({ ...prev, status: newStatus }));
             } else {
-                alert(data.message || "فشل في تحديث الحالة");
+                alert(data.message || "Failed to update status");
             }
         } catch (err) {
             console.error(err);
-            alert("حدث خطأ أثناء تعديل الحالة");
+            alert("Error occurred while updating status");
         } finally {
             setUpdatingStatus(false);
         }
@@ -104,7 +104,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
         return (
             <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
                 <Loader2 className="w-12 h-12 animate-spin text-indigo-500 mb-4" />
-                <p className="text-sm font-semibold text-slate-400">جاري تحميل تفاصيل الطلب...</p>
+                <p className="text-sm font-semibold text-slate-400">Loading Order Details...</p>
             </div>
         );
     }
@@ -115,7 +115,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                 <div className="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-xl max-w-md w-full text-center">
                     <p className="text-red-400 font-bold mb-6">{error}</p>
                     <button onClick={() => router.push("/dashboard/orders")} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all">
-                        العودة لإدارة الطلبات
+                        Back to Orders Management
                     </button>
                 </div>
             </div>
@@ -137,12 +137,12 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
     };
 
     const statusTranslations = {
-        Pending: "قيد الانتظار",
-        Processing: "قيد التحضير",
-        Paid: "تم الدفع",
-        Shipped: "تم الشحن",
-        Delivered: "تم التوصيل",
-        Cancelled: "ملغي",
+        Pending: "Pending",
+        Processing: "Processing",
+        Paid: "Paid",
+        Shipped: "Shipped",
+        Delivered: "Delivered",
+        Cancelled: "Cancelled",
     };
 
     return (
@@ -153,7 +153,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                     onClick={() => router.push("/dashboard/orders")} 
                     className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-indigo-400 mb-8 transition-colors"
                 >
-                    <ArrowLeft className="w-4 h-4 rotate-180" /> العودة لقائمة الطلبات
+                    <ArrowLeft className="w-4 h-4" /> Back to Orders List
                 </button>
 
                 {/* Header */}
@@ -161,7 +161,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                     <div>
                         <h1 className="text-2xl font-black text-white flex items-center gap-3">
                             <span className="font-mono text-indigo-400">#{order._id.slice(-8).toUpperCase()}</span>
-                            <span>تفاصيل الطلب</span>
+                            <span>Order Details</span>
                         </h1>
                         <p className="text-xs text-slate-400 mt-2 font-mono flex items-center gap-1.5 justify-end">
                             {new Date(order.createdAt).toLocaleString("ar-EG")}
@@ -175,19 +175,19 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                         </span>
 
                         <div className="flex items-center gap-2">
-                            <label className="text-xs font-bold text-slate-400 hidden sm:inline-block">تعديل الحالة:</label>
+                            <label className="text-xs font-bold text-slate-400 hidden sm:inline-block">Edit Status:</label>
                             <select 
                                 value={order.status}
                                 disabled={updatingStatus}
                                 onChange={(e) => handleUpdateStatus(e.target.value)}
                                 className="bg-slate-800 border border-slate-700 text-white font-bold rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-500 cursor-pointer disabled:opacity-50"
                             >
-                                <option value="Pending">قيد الانتظار</option>
-                                <option value="Processing">قيد التحضير</option>
-                                <option value="Paid">تم الدفع</option>
-                                <option value="Shipped">تم الشحن</option>
-                                <option value="Delivered">تم التوصيل</option>
-                                <option value="Cancelled">ملغي</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
                     </div>
@@ -195,12 +195,12 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    {/* عمود المنتجات والملخص (2/3) */}
+                    {/* عمود Products والملخص (2/3) */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* قائمة المنتجات */}
+                        {/* قائمة Products */}
                         <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-6 shadow-md">
                             <h2 className="text-base font-black text-white flex items-center gap-2 mb-6">
-                                <ShoppingBag className="w-5 h-5 text-indigo-400" /> المنتجات المطلوبة
+                                <ShoppingBag className="w-5 h-5 text-indigo-400" /> Requested Products
                             </h2>
 
                             <div className="divide-y divide-slate-800">
@@ -217,7 +217,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-bold text-sm text-white truncate">{item.name}</h3>
-                                            <p className="text-xs text-slate-400 mt-1">الكمية: {item.qty} × {item.price}$</p>
+                                            <p className="text-xs text-slate-400 mt-1">Quantity: {item.qty} × {item.price}$</p>
                                         </div>
                                         <div className="text-left font-black text-white text-sm">
                                             ${(item.price * item.qty).toFixed(2)}
@@ -230,33 +230,38 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                         {/* ملخص الحساب */}
                         <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-6 shadow-md space-y-4">
                             <div className="flex justify-between text-sm font-bold text-slate-400">
-                                <span>المجموع الفرعي</span>
+                                <span>Subtotal</span>
                                 <span className="text-white">${order.totalPrice?.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-sm font-bold text-slate-400">
-                                <span>الشحن والتسليم</span>
-                                <span className="text-emerald-400 font-bold">مجاني</span>
+                                <span>Shipping & Delivery</span>
+                                <span className="text-emerald-400 font-bold">Free</span>
                             </div>
                             <div className="flex justify-between text-sm font-bold text-slate-400">
-                                <span>طريقة الدفع</span>
+                                <span>Payment Method</span>
                                 <span className="text-indigo-400 font-bold flex items-center gap-1">
-                                    {order.paymentResult?.id === "COD" || order.stripeSessionId?.startsWith("COD-") ? "الدفع عند الاستلام (COD)" : "بطاقة ائتمان (Stripe)"}
+                                    {order.paymentMethod === "COD"
+                                        ? "Cash on Delivery (COD)"
+                                        : order.paymentMethod === "Kashier"
+                                            ? "Credit Card (Kashier)"
+                                            : order.paymentMethod || "Credit Card"
+                                    }
                                     <CreditCard className="w-4 h-4" />
                                 </span>
                             </div>
                             <div className="pt-4 border-t border-slate-800 flex justify-between text-lg font-black text-white">
-                                <span>المجموع الكلي</span>
+                                <span>Total Amount</span>
                                 <span className="text-indigo-400 font-mono">${order.totalPrice?.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* عمود بيانات العميل والشحن (1/3) */}
+                    {/* عمود بيانات العميل وShipping (1/3) */}
                     <div className="space-y-6">
                         {/* بيانات العميل كحساب */}
                         <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-6 shadow-md">
                             <h2 className="text-base font-black text-white flex items-center gap-2 mb-6">
-                                <User className="w-5 h-5 text-indigo-400" /> حساب المشتري
+                                <User className="w-5 h-5 text-indigo-400" /> Buyer Account
                             </h2>
                             
                             <div className="space-y-4">
@@ -272,16 +277,16 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                             </div>
                         </div>
 
-                        {/* تفاصيل عنوان الشحن الكلي */}
+                        {/* تفاصيل Shipping Address الكلي */}
                         <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-6 shadow-md space-y-6 relative overflow-hidden">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-base font-black text-white flex items-center gap-2">
-                                    <MapPin className="w-5 h-5 text-indigo-400" /> عنوان الشحن بالتفصيل
+                                    <MapPin className="w-5 h-5 text-indigo-400" /> Detailed Shipping Address
                                 </h2>
                                 {order.shippingAddress && (
                                     <button 
                                         onClick={() => {
-                                            const details = `الاسم: ${order.shippingAddress.fullName}\nالهاتف: ${order.shippingAddress.phone}\nالمحافظة: ${order.shippingAddress.city}\nالشارع: ${order.shippingAddress.streetName || "غير محدد"}\nالعنوان: ${order.shippingAddress.address}`;
+                                            const details = `Name: ${order.shippingAddress.fullName}\nPhone: ${order.shippingAddress.phone}\nRegion: ${order.shippingAddress.city}\nStreet: ${order.shippingAddress.streetName || "Not specified"}\nAddress: ${order.shippingAddress.address}`;
                                             handleCopyText(details, "all");
                                         }}
                                         className="text-xs text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 transition-colors"
@@ -289,12 +294,12 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                         {copiedField === "all" ? (
                                             <>
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                                                <span className="text-emerald-400">تم النسخ!</span>
+                                                <span className="text-emerald-400">Copied!</span>
                                             </>
                                         ) : (
                                             <>
                                                 <Copy className="w-3.5 h-3.5" />
-                                                <span>نسخ الكل</span>
+                                                <span>Copy All</span>
                                             </>
                                         )}
                                     </button>
@@ -303,10 +308,10 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
 
                             {order.shippingAddress ? (
                                 <div className="space-y-4 text-sm leading-relaxed">
-                                    {/* الاسم */}
+                                    {/* Name */}
                                     <div className="flex items-center justify-between p-3 bg-slate-950 rounded-2xl border border-slate-800 hover:border-indigo-500/30 transition-all">
                                         <div className="min-w-0">
-                                            <p className="text-[10px] font-bold text-slate-400">اسم المستلم</p>
+                                            <p className="text-[10px] font-bold text-slate-400">Recipient Name</p>
                                             <p className="font-bold text-white mt-1 truncate">{order.shippingAddress.fullName}</p>
                                         </div>
                                         <button 
@@ -317,10 +322,10 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                         </button>
                                     </div>
 
-                                    {/* الهاتف */}
+                                    {/* Phone */}
                                     <div className="flex items-center justify-between p-3 bg-slate-950 rounded-2xl border border-slate-800 hover:border-indigo-500/30 transition-all">
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400">رقم الهاتف</p>
+                                            <p className="text-[10px] font-bold text-slate-400">Phone Number</p>
                                             <p className="font-bold text-indigo-400 mt-1 font-mono">{order.shippingAddress.phone}</p>
                                         </div>
                                         <button 
@@ -331,18 +336,18 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                         </button>
                                     </div>
 
-                                    {/* المحافظة */}
+                                    {/* Region / State */}
                                     <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800">
-                                        <p className="text-[10px] font-bold text-slate-400">المحافظة</p>
+                                        <p className="text-[10px] font-bold text-slate-400">Region / State</p>
                                         <p className="font-bold text-white mt-1">{order.shippingAddress.city}</p>
                                     </div>
 
-                                    {/* الشارع */}
+                                    {/* Street */}
                                     {order.shippingAddress.streetName && (
                                         <div className="flex items-center justify-between p-3 bg-slate-950 rounded-2xl border border-slate-800 hover:border-indigo-500/30 transition-all">
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-[10px] font-bold text-slate-400">اسم الشارع</p>
-                                                <p className="font-bold text-white mt-1 break-words">{order.shippingAddress.streetName}</p>
+                                                <p className="text-[10px] font-bold text-slate-400">Street Name</p>
+                                                <p className="font-bold text-white mt-1 wrap-break-word">{order.shippingAddress.streetName}</p>
                                             </div>
                                             <button 
                                                 onClick={() => handleCopyText(order.shippingAddress.streetName, "street")}
@@ -353,11 +358,11 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                         </div>
                                     )}
 
-                                    {/* العنوان بالتفصيل */}
+                                    {/* Address بالتفصيل */}
                                     <div className="flex items-center justify-between p-3 bg-slate-950 rounded-2xl border border-slate-800 hover:border-indigo-500/30 transition-all">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-bold text-slate-400">تفاصيل العنوان</p>
-                                            <p className="font-semibold text-slate-300 mt-1 break-words">{order.shippingAddress.address}</p>
+                                            <p className="text-[10px] font-bold text-slate-400">Address Details</p>
+                                            <p className="font-semibold text-slate-300 mt-1 wrap-break-word">{order.shippingAddress.address}</p>
                                         </div>
                                         <button 
                                             onClick={() => handleCopyText(order.shippingAddress.address, "addressDetail")}
@@ -369,7 +374,7 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                 </div>
                             ) : (
                                 <p className="text-xs font-bold text-rose-500 text-center py-4 bg-slate-950 rounded-2xl border border-slate-800">
-                                    لا توجد معلومات شحن مسجلة لهذا الطلب.
+                                    No shipping information recorded for this order.
                                 </p>
                             )}
                         </div>

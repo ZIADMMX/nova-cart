@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/components/providers/CartProvider"; // 🛠️ تم تصحيح المسار الإملائي لـ components
+import { useCart } from "@/components/providers/CartProvider"; // 🛠️ تم تصحيح المسار الإمNoئي لـ components
 import { ShoppingBag, AlertTriangle } from "lucide-react";
 
 export default function AddToCartButton({ product }) {
@@ -10,7 +10,7 @@ export default function AddToCartButton({ product }) {
     const isOutOfStock = product?.stock !== undefined && product.stock <= 0;
 
     const handleAddToCart = () => {
-        if (isOutOfStock) return; // حماية إضافية تمنع الإضافة بالخطأ
+        if (isOutOfStock) return; // حماية إضافية تمنع الإضافة بالError
         addToCart(product, 1);
     };
 
@@ -32,7 +32,7 @@ export default function AddToCartButton({ product }) {
             ) : (
                 <>
                     <ShoppingBag className="w-5 h-5" />
-                    <span>إضافة للسلة</span>
+                    <span>Add to Cart</span>
                 </>
             )}
         </button>

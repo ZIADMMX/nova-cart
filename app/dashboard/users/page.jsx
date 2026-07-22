@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    User, Shield, Mail, Calendar, ArrowLeft, Loader2, AlertCircle, CheckCircle2, AlertTriangle, Users
+    User, Shield, Mail, Calendar, ArrowLeft, Loader2, AlertCircle, CheckCircle2, AlertTriangle, Users, Trash2
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -16,6 +16,10 @@ export default function UsersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [mounted, setMounted] = useState(false);
+    const [deleteUserId, setDeleteUserId] = useState(null);
+    const [isDeletingUser, setIsDeletingUser] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [warningMessage, setWarningMessage] = useState("");
 
     // States for pagination
     const [page, setPage] = useState(1);
@@ -23,10 +27,8 @@ export default function UsersPage() {
     const [total, setTotal] = useState(0);
     const limit = 10;
     
-    // حالات للميكرو أنيماشن والتفاعل
+    // حاNoت للميكرو أنيماشن والتفاعل
     const [updatingUserId, setUpdatingUserId] = useState(null);
-    const [successMessage, setSuccessMessage] = useState("");
-    const [warningMessage, setWarningMessage] = useState("");
 
     useEffect(() => {
         setMounted(true);
@@ -114,7 +116,7 @@ export default function UsersPage() {
                 throw new Error(data.message || "Failed to update user role");
             }
 
-            // تحديث قائمة المستخدمين محلياً
+            // تحديث قائمة Users محلياً
             setUsers(prevUsers => 
                 prevUsers.map(u => u._id === targetUserId ? { ...u, role: newRole } : u)
             );
@@ -126,6 +128,40 @@ export default function UsersPage() {
             setError(err.message);
         } finally {
             setUpdatingUserId(null);
+        }
+    };
+
+    const handleDeleteUser = async (targetUserId) => {
+        if (!targetUserId) return;
+
+        setError("");
+        setSuccessMessage("");
+        setIsDeletingUser(true);
+
+        try {
+            const res = await fetch("/api/users", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId: targetUserId }),
+                credentials: "include",
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to delete user");
+            }
+
+            setUsers(prevUsers => prevUsers.filter(u => u._id !== targetUserId));
+            setTotal(prev => Math.max(prev - 1, 0));
+            setSuccessMessage("User deleted successfully.");
+            setTimeout(() => setSuccessMessage(""), 4000);
+            setDeleteUserId(null);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsDeletingUser(false);
         }
     };
 
@@ -231,7 +267,7 @@ export default function UsersPage() {
                     </div>
                 )}
 
-                {/* جدول المستخدمين الرئيسي */}
+                {/* جدول Users الرئيسي */}
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-xs">
                         <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
@@ -287,20 +323,53 @@ export default function UsersPage() {
                                                 {/* عمود التحكم المتاح للأدمن والسوبر أدمن */}
                                                 {(user?.role === "admin" || user?.role === "super_admin") && (
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <select
-                                                                disabled={isSelf || updatingUserId === u._id || (user?.role === "admin" && u.role === "super_admin")}
-                                                                value={u.role || "user"}
-                                                                onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                                                                className={`bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 outline-none font-bold text-xs focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-all ${isSelf || (user?.role === "admin" && u.role === "super_admin") ? "opacity-50 cursor-not-allowed" : "hover:border-slate-300 dark:hover:border-slate-700"}`}
-                                                            >
-                                                                <option value="user">User (Normal)</option>
-                                                                <option value="admin">Admin</option>
-                                                                {user?.role === "super_admin" && <option value="super_admin">Super Admin</option>}
-                                                            </select>
-                                                            
-                                                            {updatingUserId === u._id && (
-                                                                <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                                        <div className="flex flex-col gap-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <select
+                                                                    disabled={isSelf || updatingUserId === u._id || (user?.role === "admin" && u.role === "super_admin")}
+                                                                    value={u.role || "user"}
+                                                                    onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                                                                    className={`bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 outline-none font-bold text-xs focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-all ${isSelf || (user?.role === "admin" && u.role === "super_admin") ? "opacity-50 cursor-not-allowed" : "hover:border-slate-300 dark:hover:border-slate-700"}`}
+                                                                >
+                                                                    <option value="user">User (Normal)</option>
+                                                                    <option value="admin">Admin</option>
+                                                                    {user?.role === "super_admin" && <option value="super_admin">Super Admin</option>}
+                                                                </select>
+                                                                
+                                                                {updatingUserId === u._id && (
+                                                                    <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                                                )}
+                                                            </div>
+                                                            {u.role === "user" && !isSelf ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    {deleteUserId === u._id ? (
+                                                                        <>
+                                                                            <button
+                                                                                onClick={() => handleDeleteUser(u._id)}
+                                                                                disabled={isDeletingUser}
+                                                                                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-red-600 text-white text-[11px] font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+                                                                            >
+                                                                                {isDeletingUser ? "Deleting..." : "Confirm Delete"}
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => setDeleteUserId(null)}
+                                                                                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 transition-colors"
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                        </>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => setDeleteUserId(u._id)}
+                                                                            className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors text-[11px] font-bold"
+                                                                        >
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                            Delete User
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-[10px] text-slate-500">Delete only standard users</span>
                                                             )}
                                                         </div>
                                                     </td>

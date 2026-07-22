@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// ⚠️ ملاحظة: تم تعديل المسار إلى componant ليتطابق مع مجلد مشروعك الفعلي لكي لا يظهر خطأ أثناء الـ Build
+// ⚠️ مNoحظة: تم Edit المسار إلى componant ليتطابق مع مجلد مشروعك الفعلي لكي No يظهر Error أثناء الـ Build
 import { useAuth } from "@/components/providers/AuthProvider"; 
 import AdminCharts from "@/components/AdminChart";
 import { 
@@ -268,7 +268,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* القسم الأيسر: أحدث الطلبات (يأخذ مساحة أكبر) */}
+                    {/* القسم الأيسر: أحدث Orders (يأخذ مساحة أكبر) */}
                     <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-slate-200/60 dark:border-slate-800/80 overflow-hidden flex flex-col">
                         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-2">

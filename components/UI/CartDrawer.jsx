@@ -1,10 +1,11 @@
 "use client";
 
-import { useCart } from "@/components/providers/CartProvider"; // 🛠️ تصحيح المسار الإملائي الصحيح
+import { useCart } from "@/components/providers/CartProvider"; // 🛠️ تصحيح المسار الإمNoئي الصحيح
 import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import Image from "next/image"; // 🛠️ تفعيل الاستفادة من مكون تحسين الصور
+import Image from "next/image"; // 🛠️ تفعيل اNoستفادة من مكون تحسين الصور
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { formatPrice } from "@/lib/formatPrice";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal } = useCart();
@@ -39,7 +40,7 @@ export default function CartDrawer() {
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
           <h2 className="text-xl font-bold flex items-center gap-2 dark:text-white">
-            <ShoppingBag className="w-5 h-5" /> عربة التسوق
+            <ShoppingBag className="w-5 h-5" /> Shopping Cart
           </h2>
           <button 
             onClick={() => setIsCartOpen(false)}
@@ -59,7 +60,7 @@ export default function CartDrawer() {
                 onClick={() => setIsCartOpen(false)}
                 className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
               >
-                متابعة التسوق
+                Continue Shopping
               </button>
             </div>
           ) : (
@@ -69,8 +70,8 @@ export default function CartDrawer() {
                   {/* Image wrapper with custom next/image optimization */}
                   <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shrink-0">
                     <Image 
-                      src={item.imageUrl || "https://placehold.co/100x100"} // 🛠️ استخدام imageUrl بدلاً من image
-                      alt={item.title || "product"} // 🛠️ استخدام title بدلاً من name
+                      src={item.imageUrl || "https://placehold.co/100x100"} // 🛠️ استخدام imageUrl بدNoً من image
+                      alt={item.title || "product"} // 🛠️ استخدام title بدNoً من name
                       fill
                       className="object-cover"
                       sizes="80px"
@@ -78,12 +79,12 @@ export default function CartDrawer() {
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      {/* 🛠️ استخدام title بدلاً من name للانسجام مع الـ DB */}
+                      {/* 🛠️ استخدام title بدNoً من name لNoنسجام مع الـ DB */}
                       <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1">
                         {item.title}
                       </h3>
                       <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                        ${item.price}
+                        {formatPrice(item.price, item.currency || "EGP")}
                       </p>
                     </div>
                     
@@ -123,8 +124,8 @@ export default function CartDrawer() {
         {cart.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
             <div className="flex justify-between items-center mb-4 text-lg font-bold dark:text-white">
-              <span>إجمالي السعر:</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>Total Price:</span>
+              <span>{formatPrice(cartTotal, "EGP")}</span>
             </div>
             <button 
               onClick={handleCheckout}

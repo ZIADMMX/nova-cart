@@ -6,7 +6,7 @@ export async function POST(req) {
     try {
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
-            return NextResponse.json({ message: "مفتاح الذكاء الاصطناعي غير متوفر (GEMINI_API_KEY)" }, { status: 400 });
+            return NextResponse.json({ message: "مفتاح الذكاء اNoصطناعي Out of Stock (GEMINI_API_KEY)" }, { status: 400 });
         }
         
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -24,10 +24,10 @@ export async function POST(req) {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `أنت خبير تسويق إلكتروني محترف.
-اكتب وصف تسويقي جذاب واحترافي لمنتج يحمل الاسم: "${title}" 
+اكتب وصف تسويقي جذاب واحترافي لمنتج يحمل اNoسم: "${title}" 
 والتصنيف: "${category || 'عام'}".
-الوصف يجب أن يكون باللغة العربية، ومقسم إلى فقرة قصيرة تلفت الانتباه، ثم قائمة بالنقاط (Bullets) لأهم المميزات.
-لا تكتب أي مقدمات أو خاتمة مثل "بالتأكيد" أو "إليك الوصف"، بل اكتب الوصف مباشرة.`;
+الوصف يجب أن يكون باللغة العربية، ومقسم إلى فقرة قصيرة تلفت اNoنتباه، ثم قائمة بالنقاط (Bullets) لأهم المميزات.
+No تكتب أي مقدمات أو خاتمة مثل "بالتأكيد" أو "إليك الوصف"، بل اكتب الوصف مباشرة.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;

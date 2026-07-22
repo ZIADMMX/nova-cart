@@ -84,7 +84,7 @@ export default function SettingsPage() {
                 tiktok: data.tiktok || "",
             });
         } catch (err) {
-            setError("فشل في جلب الإعدادات");
+            setError("Failed to fetch Settings");
         } finally {
             setIsLoading(false);
         }
@@ -113,13 +113,13 @@ export default function SettingsPage() {
                     ...prev,
                     [field === "logo" ? "logoUrl" : "faviconUrl"]: data.url
                 }));
-                setSuccess(field === "logo" ? "تم رفع شعار الموقع بنجاح! ✅" : "تم رفع أيقونة المتصفح بنجاح! ✅");
+                setSuccess(field === "logo" ? "Logo uploaded successfully! ✅" : "Favicon uploaded successfully! ✅");
                 setTimeout(() => setSuccess(""), 4000);
             } else {
-                setError(data.message || "فشل رفع الملف");
+                setError(data.message || "Failed to upload file");
             }
         } catch (err) {
-            setError("حدث خطأ أثناء رفع الملف");
+            setError("Error occurred while uploading file");
         } finally {
             if (field === "logo") setIsUploadingLogo(false);
             if (field === "favicon") setIsUploadingFavicon(false);
@@ -139,8 +139,8 @@ export default function SettingsPage() {
                 credentials: "include",
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "فشل في الحفظ");
-            setSuccess("تم حفظ الإعدادات بنجاح! ✅");
+            if (!res.ok) throw new Error(data.message || "Failed to save");
+            setSuccess("Settings saved successfully! ✅");
             setTimeout(() => setSuccess(""), 4000);
         } catch (err) {
             setError(err.message);
@@ -208,11 +208,11 @@ export default function SettingsPage() {
                             {/* Brand Identity Section */}
                             <div className="space-y-5">
                                 <div>
-                                    <h3 className="text-sm font-black text-indigo-600 dark:text-indigo-400 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">هوية الموقع (Brand Identity)</h3>
+                                    <h3 className="text-sm font-black text-indigo-600 dark:text-indigo-400 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Brand Identity</h3>
                                 </div>
                                 
                                 <div>
-                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">اسم المتجر (Site Name)</label>
+                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Site Name</label>
                                     <input
                                         type="text"
                                         value={formData.siteName}
@@ -223,11 +223,11 @@ export default function SettingsPage() {
                                 </div>
 
                                 <div>
-                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">وصف المتجر لـ SEO (Site Description)</label>
+                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Site Description (SEO)</label>
                                     <textarea
                                         value={formData.siteDescription}
                                         onChange={(e) => setFormData({ ...formData, siteDescription: e.target.value })}
-                                        placeholder="وصف مختصر يظهر في جوجل وعند مشاركة الرابط..."
+                                        placeholder="A brief description that appears in Google and when sharing the link..."
                                         rows={3}
                                         className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-900 dark:text-white transition-all resize-none"
                                     />
@@ -236,7 +236,7 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     {/* شعار الموقع */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">شعار الموقع (Logo)</label>
+                                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">Site Logo</label>
                                         <div className="flex gap-3 items-center">
                                             {formData.logoUrl && (
                                                 <div className="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-950">
@@ -247,10 +247,10 @@ export default function SettingsPage() {
                                                 {isUploadingLogo ? (
                                                     <>
                                                         <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                                                        جاري الرفع...
+                                                        Uploading...
                                                     </>
                                                 ) : (
-                                                    <>رفع الشعار</>
+                                                    <>Upload Logo</>
                                                 )}
                                                 <input
                                                     type="file"
@@ -265,14 +265,14 @@ export default function SettingsPage() {
                                             type="text"
                                             value={formData.logoUrl}
                                             onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                                            placeholder="أو اكتب رابط الشعار هنا..."
+                                            placeholder="Or paste logo URL here..."
                                             className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-900 dark:text-white font-mono transition-all"
                                         />
                                     </div>
 
                                     {/* أيقونة المتصفح */}
                                     <div className="space-y-2">
-                                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">أيقونة المتصفح (Favicon)</label>
+                                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">Favicon</label>
                                         <div className="flex gap-3 items-center">
                                             {formData.faviconUrl && (
                                                 <div className="w-12 h-12 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-950">
@@ -283,10 +283,10 @@ export default function SettingsPage() {
                                                 {isUploadingFavicon ? (
                                                     <>
                                                         <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                                                        جاري الرفع...
+                                                        Uploading...
                                                     </>
                                                 ) : (
-                                                    <>رفع الأيقونة</>
+                                                    <>Upload Favicon</>
                                                 )}
                                                 <input
                                                     type="file"
@@ -301,7 +301,7 @@ export default function SettingsPage() {
                                             type="text"
                                             value={formData.faviconUrl}
                                             onChange={(e) => setFormData({ ...formData, faviconUrl: e.target.value })}
-                                            placeholder="أو اكتب رابط الأيقونة هنا..."
+                                            placeholder="Or paste favicon URL here..."
                                             className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-900 dark:text-white font-mono transition-all"
                                         />
                                     </div>
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                             {/* Social Media Section */}
                             <div className="space-y-5 pt-4">
                                 <div>
-                                    <h3 className="text-sm font-black text-indigo-600 dark:text-indigo-400 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">روابط التواصل (Social Media)</h3>
+                                    <h3 className="text-sm font-black text-indigo-600 dark:text-indigo-400 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Social Media Links</h3>
                                 </div>
                             <div>
                                 <label className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">

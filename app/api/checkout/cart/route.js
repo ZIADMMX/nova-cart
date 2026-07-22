@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import connectToMongo from "@/lib/db";
 import Product from "@/model/Product";
 import Order from "@/model/Order";
 import { getAuthFromCookie } from "@/lib/auth";
-
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+import crypto from "crypto";
 
 const rateLimitMap = new Map();
 
@@ -40,35 +38,34 @@ export async function POST(request) {
     try {
         const auth = await getAuthFromCookie();
         if (!auth || !auth.userId) {
-            return NextResponse.json({ error: "يرجى تسجيل الدخول أولاً لإتمام الشراء" }, { status: 401 });
+            return NextResponse.json({ error: "يرجى Sign In أوNoً لإتمام الشراء" }, { status: 401 });
         }
 
         if (isRateLimited(auth.userId)) {
-            return NextResponse.json({ error: "لقد تجاوزت عدد المحاولات المسموحة. يرجى الانتظار دقيقة والمحاولة مجدداً." }, { status: 429 });
+            return NextResponse.json({ error: "لقد تجاوزت عدد المحاوNoت المسموحة. يرجى اNoنتظار دقيقة والمحاولة مجدداً." }, { status: 429 });
         }
 
         const body = await request.json();
         const { items } = body; // Array of cart items
 
         if (!items || !items.length) {
-            return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
+            return NextResponse.json({ error: "Your cart is empty" }, { status: 400 });
         }
 
         await connectToMongo();
 
         let totalPrice = 0;
         const orderItems = [];
-        const line_items = [];
 
         for (const item of items) {
             const product = await Product.findById(item._id || item.id);
             if (!product) {
-                // 🛠️ تصحيح: استخدام title بدلاً من name لمنع الـ undefined
+                // 🛠️ تصحيح: استخدام title بدNoً من name لمنع الـ undefined
                 return NextResponse.json({ error: `المنتج ${item.title || "المطلوب"} غير موجود في قاعدة البيانات` }, { status: 404 });
             }
 
             if (product.stock < item.quantity) {
-                return NextResponse.json({ error: `الكمية المطلوبة لـ ${product.title} غير متوفرة في المخزن.` }, { status: 400 });
+                return NextResponse.json({ error: `Quantity المطلوبة لـ ${product.title} Out of Stockة في المخزن.` }, { status: 400 });
             }
 
             totalPrice += product.price * item.quantity;
@@ -80,57 +77,50 @@ export async function POST(request) {
                 image: product.imageUrl,
                 qty: item.quantity,
             });
-
-            // 🛠️ تأمين رابط الصورة لـ Stripe: يجب أن يكون مطلقاً ويبدأ بـ https
-            const validImageUrl = product.imageUrl && product.imageUrl.startsWith("http") 
-                ? product.imageUrl 
-                : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"; // صورة بديلة عامة مقبولة لدى Stripe
-
-            line_items.push({
-                price_data: {
-                    currency: (product.currency || "egp").toLowerCase(), // 🇪🇬 التكيف التلقائي مع عملة المنتج
-                    product_data: {
-                        name: product.title,
-                        images: [validImageUrl], // تمرير الرابط الآمن والمطابق لسياسة Stripe
-                    },
-                    unit_amount: Math.round(product.price * 100), // تحويل السعر لـ Cents/Piasters
-                },
-                quantity: item.quantity,
-            });
         }
 
         const order = new Order({
             user: auth.userId,
             orderItems,
             totalPrice,
+            paymentMethod: "Kashier",
             status: "Pending"
         });
 
         await order.save();
 
-        if (!stripe) {
-            return NextResponse.json({ error: "بوابة دفع Stripe غير مهيأة (STRIPE_SECRET_KEY مفقود)" }, { status: 500 });
+        const kashierSecretKey = process.env.KASHIER_SECRET_KEY || process.env.KASHIER_API_KEY;
+        const kashierMid = process.env.KASHIER_MID;
+
+        if (!kashierSecretKey || !kashierMid) {
+            return NextResponse.json({ error: "Kashier payment is not configured. تحقق من KASHIER_SECRET_KEY و KASHIER_MID." }, { status: 500 });
         }
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            line_items,
-            mode: "payment",
-            success_url: `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Cancel`,
-            metadata: {
-                orderId: order._id.toString(),
-                isCart: "true"
-            }
-        });
+        const formattedAmount = totalPrice.toFixed(2);
+        const orderId = order._id.toString();
+        const kashierCurrency = "EGP";
+        const pathString = `/?payment=${kashierMid}.${orderId}.${formattedAmount}.${kashierCurrency}`;
+        const hash = crypto.createHmac("sha256", kashierSecretKey)
+            .update(pathString)
+            .digest("hex");
 
-        order.stripeSessionId = session.id;
-        await order.save();
+        const merchantRedirect = `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Success`;
+        const kashierUrl = `https://checkout.kashier.io/?` +
+            `merchantId=${kashierMid}` +
+            `&orderId=${orderId}` +
+            `&amount=${formattedAmount}` +
+            `&currency=${kashierCurrency}` +
+            `&hash=${hash}` +
+            `&merchantRedirect=${merchantRedirect}` +
+            `&mode=${process.env.KASHIER_MODE || "test"}` +
+            `&failureRedirect=true` +
+            `&redirectMethod=get` +
+            `&display=ar`;
 
-        return NextResponse.json({ url: session.url });
+        return NextResponse.json({ success: true, url: kashierUrl });
 
     } catch (error) {
         console.error("❌ Cart Checkout Error:", error);
-        return NextResponse.json({ error: "حدث خطأ داخلي في الخادم" }, { status: 500 });
+        return NextResponse.json({ error: "حدث Error داخلي في الخادم" }, { status: 500 });
     }
 }

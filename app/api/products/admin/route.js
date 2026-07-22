@@ -48,12 +48,12 @@ export async function GET(request) {
 
     return NextResponse.json(products);
   } catch (error) {
-    // 🛠️ أمان سيبراني: تسجيل الخطأ الحقيقي في السيرفر فقط لمراقبته
+    // 🛠️ أمان سيبراني: تسجيل الError الحقيقي في السيرفر فقط لمراقبته
     console.error("Admin Products API Error:", error);
 
     // 🛠️ أمان سيبراني: إرسال رسالة عامة للمستخدم لمنع تسريب تفاصيل الداتا بيز للمخترقين
     return NextResponse.json(
-      { message: 'حدث خطأ داخلي في الخادم' },
+      { message: 'حدث Error داخلي في الخادم' },
       { status: 500 }
     );
   }

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
-    Package, ShoppingBag, CheckCircle, Clock, XCircle, AlertCircle, Loader2
+    Package, Store, ShoppingBag, CheckCircle, Clock, XCircle, AlertCircle, Loader2, Trash2
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-// 🛠️ استخدام Toast لعرض أخطاء التعديل دون إخفاء الجدول
+// 🛠️ استخدام Toast لعرض أخطاء الEdit دون إخفاء الجدول
 import { toast } from "react-toastify";
 
 // 🛠️ نقل الدوال الثابتة خارج الـ Component لمنع إعادة إنشائها مع كل Render
@@ -41,7 +41,7 @@ export default function OrderPage() {
     const router = useRouter();
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [fetchError, setFetchError] = useState(""); // 🛠️ فصل أخطاء الجلب عن أخطاء التعديل
+    const [fetchError, setFetchError] = useState(""); // 🛠️ فصل أخطاء الجلب عن أخطاء الEdit
     const [mounted, setMounted] = useState(false);
 
     // States for pagination
@@ -72,14 +72,28 @@ export default function OrderPage() {
                 setPage(data.page);
                 setPages(data.pages);
                 setTotal(data.total);
+                // 🛠️ Save Orders محلياً للرجوع إليها وقت انقطاع الإنترنت
+                localStorage.setItem("cachedOrders", JSON.stringify(data.orders));
             } else {
                 setOrders(data);
                 setPage(1);
                 setPages(1);
                 setTotal(data.length);
+                localStorage.setItem("cachedOrders", JSON.stringify(data));
             }
         } catch (err) {
-            setFetchError(err.message);
+            // 🛠️ جلب Orders من التخزين المحلي في حال عدم وجود إنترنت أو Error في الشبكة
+            if (!navigator.onLine || err.message === "Failed to fetch") {
+                const cached = localStorage.getItem("cachedOrders");
+                if (cached) {
+                    setOrders(JSON.parse(cached));
+                    toast.info("Offline mode: Showing cached orders", { autoClose: 3000 });
+                } else {
+                    setFetchError(err.message);
+                }
+            } else {
+                setFetchError(err.message);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -98,15 +112,90 @@ export default function OrderPage() {
         }
     }, [mounted, page, fetchOrders]);
 
+    const [deleteOrderId, setDeleteOrderId] = useState(null);
+    const [isDeletingOrder, setIsDeletingOrder] = useState(false);
 
+    const handleDeleteOrder = async (orderId) => {
+        const previousOrders = [...orders];
+        setIsDeletingOrder(true);
+        setDeleteOrderId(orderId);
 
-    const updateOrderStatus = async (orderId, newStatus) => {
-        const previousOrders = [...orders]; // 🛠️ حفظ الحالة للـ Rollback
         try {
-            setOrders(prevOrders =>
-                prevOrders.map((o) => o._id === orderId ? { ...o, status: newStatus } : o)
-            );
+            const res = await fetch(`/api/order/${orderId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to delete order");
+            }
 
+            setOrders(prev => prev.filter(o => o._id !== orderId));
+            setTotal(prev => Math.max(prev - 1, 0));
+            toast.success(data.message || "Order deleted successfully");
+        } catch (error) {
+            toast.error(error.message);
+            setOrders(previousOrders);
+        } finally {
+            setIsDeletingOrder(false);
+            setDeleteOrderId(null);
+        }
+    };
+
+    // 🛠️ دالة لمزامنة التحديثات المحفوظة عند عودة الإنترنت
+    const syncOfflineUpdates = useCallback(async () => {
+        const queue = JSON.parse(localStorage.getItem("offlineOrderUpdates") || "[]");
+        if (queue.length === 0) return;
+        
+        toast.info("Syncing offline updates...");
+        let failedQueue = [];
+        
+        for (const update of queue) {
+            try {
+                const res = await fetch(`/api/orders/${update.orderId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: update.newStatus }),
+                });
+                if (!res.ok) throw new Error("Sync failed");
+            } catch (err) {
+                failedQueue.push(update);
+            }
+        }
+        
+        localStorage.setItem("offlineOrderUpdates", JSON.stringify(failedQueue));
+        if (failedQueue.length === 0) {
+            toast.success("All offline updates synced successfully!");
+        } else {
+            toast.error("Some updates failed to sync.");
+        }
+    }, []);
+
+    // 🛠️ استماع لحالة الشبكة (Online / Offline)
+    useEffect(() => {
+        if (mounted) {
+            window.addEventListener('online', syncOfflineUpdates);
+            return () => window.removeEventListener('online', syncOfflineUpdates);
+        }
+    }, [mounted, syncOfflineUpdates]);
+    const updateOrderStatus = async (orderId, newStatus) => {
+        const previousOrders = [...orders]; // 🛠️ Save الحالة للـ Rollback
+        
+        // التحديث في واجهة المستخدم فوراً (Optimistic UI)
+        setOrders(prevOrders =>
+            prevOrders.map((o) => o._id === orderId ? { ...o, status: newStatus } : o)
+        );
+
+        // 🛠️ إذا كان المستخدم أوفNoين، اSave التحديث في الـ localStorage
+        if (!navigator.onLine) {
+            const queue = JSON.parse(localStorage.getItem("offlineOrderUpdates") || "[]");
+            queue.push({ orderId, newStatus, timestamp: Date.now() });
+            localStorage.setItem("offlineOrderUpdates", JSON.stringify(queue));
+            toast.info("You are offline. Update saved locally and will sync when online.");
+            return;
+        }
+
+        try {
             const res = await fetch(`/api/orders/${orderId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -119,8 +208,16 @@ export default function OrderPage() {
             }
             toast.success("Order status updated successfully!");
         } catch (error) {
-            toast.error(error.message);
-            setOrders(previousOrders); // 🛠️ تراجع عن التحديث بدون إعادة جلب البيانات
+            // 🛠️ إذا فشل الطلب بسبب الشبكة رغم كون المتصفح أونNoين
+            if (error.message === "Failed to fetch") {
+                const queue = JSON.parse(localStorage.getItem("offlineOrderUpdates") || "[]");
+                queue.push({ orderId, newStatus, timestamp: Date.now() });
+                localStorage.setItem("offlineOrderUpdates", JSON.stringify(queue));
+                toast.info("Network error. Update saved locally and will sync later.");
+            } else {
+                toast.error(error.message);
+                setOrders(previousOrders); // 🛠️ تراجع عن التحديث بدون إعادة جلب البيانات
+            }
         }
     };
 
@@ -158,7 +255,7 @@ export default function OrderPage() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 sm:p-8 text-left" dir="ltr">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center gap-3 mb-6">
-                    <ShoppingBag className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                    <Store className="w-8 h-8 text-emerald-800 dark:text-emerald-400" />
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 dark:text-white font-sans">Order Management</h1>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Track and update customer purchases</p>
@@ -167,21 +264,21 @@ export default function OrderPage() {
 
                 {/* 3 Purposeful Stat Cards for Orders */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
+                    <div className="bg-linear-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
                         <div>
                             <p className="text-emerald-50 text-xs font-bold mb-1">Current Page Sales</p>
                             <h3 className="text-2xl font-black">${orders.reduce((acc, o) => acc + (o.totalPrice || 0), 0).toFixed(2)}</h3>
                         </div>
                         <ShoppingBag className="w-10 h-10 text-white/30" />
                     </div>
-                    <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
+                    <div className="bg-linear-to-br from-amber-500 to-orange-500 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
                         <div>
                             <p className="text-amber-50 text-xs font-bold mb-1">Pending Orders</p>
                             <h3 className="text-2xl font-black">{orders.filter(o => o.status === "Pending").length}</h3>
                         </div>
                         <Clock className="w-10 h-10 text-white/30" />
                     </div>
-                    <div className="bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
+                    <div className="bg-linear-to-br from-blue-500 to-indigo-500 rounded-2xl p-5 text-white flex items-center justify-between shadow-md">
                         <div>
                             <p className="text-blue-50 text-xs font-bold mb-1">Completed</p>
                             <h3 className="text-2xl font-black">{orders.filter(o => o.status === "Delivered").length}</h3>
@@ -237,11 +334,11 @@ export default function OrderPage() {
                                                                 href={`/dashboard/orders/${order._id}`} 
                                                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all text-[10px] font-black"
                                                             >
-                                                                📍 {order.shippingAddress.city} (عرض العنوان بالتفصيل)
+                                                                📍 {order.shippingAddress.city} (View full address)
                                                             </Link>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-[10px] text-slate-500 font-bold block mt-1">لا يوجد شحن (رقمي)</span>
+                                                        <span className="text-[10px] text-slate-500 font-bold block mt-1">Digital Order (No Shipping)</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -256,7 +353,7 @@ export default function OrderPage() {
                                                                     <Package className="w-4 h-4 text-gray-400" />
                                                                 )}
                                                             </div>
-                                                            <span className="font-medium text-gray-900 dark:text-gray-300 truncate max-w-[120px]">
+                                                            <span className="font-medium text-gray-900 dark:text-gray-300 truncate max-w-30">
                                                                 {item.name} <span className="text-indigo-600 font-bold">(x{item.qty || item.quantity || 1})</span>
                                                             </span>
                                                         </div>
@@ -282,21 +379,47 @@ export default function OrderPage() {
                                                 {getstatusBadge(order.status)}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <select
-                                                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                                                    value={order.status}
-                                                    disabled={getAvailableStatuses(order.status).length === 0}
-                                                    className="text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1.5 outline-none font-medium"
-                                                >
-                                                    <option disabled value={order.status}>
-                                                        Update Status
-                                                    </option>
-                                                    {getAvailableStatuses(order.status).map(stat => (
-                                                        <option key={stat} value={stat}>
-                                                            {stat}
+                                                <div className="flex flex-col gap-2">
+                                                    <select
+                                                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                                                        value={order.status}
+                                                        disabled={getAvailableStatuses(order.status).length === 0}
+                                                        className="text-xs text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1.5 outline-none font-medium"
+                                                    >
+                                                        <option disabled value={order.status}>
+                                                            Update Status
                                                         </option>
-                                                    ))}
-                                                </select>
+                                                        {getAvailableStatuses(order.status).map(stat => (
+                                                            <option key={stat} value={stat}>
+                                                                {stat}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        onClick={() => setDeleteOrderId(order._id)}
+                                                        className="inline-flex items-center justify-center gap-1 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors text-[11px] font-bold px-3 py-2"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        Delete
+                                                    </button>
+                                                    {deleteOrderId === order._id && (
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleDeleteOrder(order._id)}
+                                                                disabled={isDeletingOrder}
+                                                                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-red-600 text-white text-[11px] font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+                                                            >
+                                                                {isDeletingOrder ? "Deleting..." : "Confirm"}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeleteOrderId(null)}
+                                                                className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 transition-colors"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

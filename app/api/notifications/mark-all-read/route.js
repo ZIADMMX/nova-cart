@@ -17,9 +17,9 @@ export async function PUT(request) {
             { isRead: true }
         );
 
-        return NextResponse.json({ success: true, message: "تم تحديد جميع الإشعارات كمقروءة" });
+        return NextResponse.json({ success: true, message: "تم تحديد جميع الNotifications كمقروءة" });
     } catch (error) {
         console.error("Error marking all notifications as read:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم" }, { status: 500 });
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم" }, { status: 500 });
     }
 }

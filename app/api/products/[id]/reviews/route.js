@@ -11,7 +11,7 @@ export async function POST(request, context) {
         const user = await getAuthFromCookie();
 
         if (!user) {
-            return NextResponse.json({ message: "يرجى تسجيل الدخول أولاً لإضافة تقييم" }, { status: 401 });
+            return NextResponse.json({ message: "يرجى Sign In أوNoً لإضافة تقييم" }, { status: 401 });
         }
 
         const { rating, comment } = await request.json();
@@ -46,7 +46,7 @@ export async function POST(request, context) {
         });
 
         if (!hasBought) {
-            return NextResponse.json({ message: "عذراً، يجب شراء المنتج أولاً لتتمكن من تقييمه." }, { status: 400 });
+            return NextResponse.json({ message: "عذراً، يجب شراء المنتج أوNoً لتتمكن من تقييمه." }, { status: 400 });
         }
 
         const review = {
@@ -62,9 +62,9 @@ export async function POST(request, context) {
 
         await product.save();
 
-        return NextResponse.json({ message: "تمت إضافة التقييم بنجاح", product }, { status: 201 });
+        return NextResponse.json({ message: "تمت إضافة التقييم بSuccess", product }, { status: 201 });
     } catch (error) {
         console.error("Review error:", error);
-        return NextResponse.json({ message: "حدث خطأ أثناء حفظ التقييم" }, { status: 500 });
+        return NextResponse.json({ message: "حدث Error أثناء Save التقييم" }, { status: 500 });
     }
 }

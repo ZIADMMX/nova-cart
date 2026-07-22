@@ -26,7 +26,7 @@ export default function NotificationsPage() {
         }
     }, [isAuthenticated, authLoading, router, mounted]);
 
-    // 3. استدعاء الإشعارات فور التأكد من هوية العميل وجاهزية الواجهة
+    // 3. استدعاء الNotifications فور التأكد من هوية العميل وجاهزية الواجهة
     useEffect(() => {
         if (mounted && isAuthenticated) {
             fetchNotifications();
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
                 credentials: "include",
             });
             if (!res.ok) {
-                throw new Error("فشل في تحميل الإشعارات، يرجى المحاولة لاحقاً.");
+                throw new Error("Failed to load notifications, please try again later.");
             }
             const data = await res.json();
             setNotifications(data.notifications || data); // دعم قراءة البيانات بشكل مرن
@@ -64,19 +64,19 @@ export default function NotificationsPage() {
                 credentials: "include",
             }); 
             if (!res.ok) {
-                throw new Error("فشل في تحديث حالة الإشعار بالسيرفر.");
+                throw new Error("Failed to update notification status on server.");
             }
         } catch (error) {
-            console.error("خطأ أثناء تحديث حالة الإشعار:", error.message);    
+            console.error("Error while updating notification status:", error.message);    
         }
     };
 
-    // التحديث المحلي الفوري لجميع الإشعارات كمقروءة عند ضغط الزر الرئيسي للتحسين
+    // التحديث المحلي الفوري لجميع الNotifications كمقروءة عند ضغط الزر الرئيسي للتحسين
     const handleMarkAllAsReadLocal = () => {
         setNotifications(prev => prev.map((n) => ({ ...n, isRead: true })));
     };
         
-    // 🛠️ تم تصحيح بناء الدالة بإضافة السهم البرمجي المفقود => لتعمل بسلام
+    // 🛠️ تم تصحيح بناء الدالة بإضافة السهم البرمجي المفقود => لتعمل بسNoم
     const getNotificationIcon = (type) => {
         switch (type) {
             case "order":
@@ -96,12 +96,12 @@ export default function NotificationsPage() {
         }
     };
     
-    // واجهة التحميل الأنيقة والموحدة
+    // واجهة الLoading الأنيقة والموحدة
     if (!mounted || authLoading || isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 dir-rtl text-center">
                 <Loader2 className="w-10 h-10 animate-spin text-indigo-600 dark:text-indigo-400 mb-2" />
-                <p className="text-xs text-slate-400 font-medium">جاري تحميل صندوق الإشعارات...</p>
+                <p className="text-xs text-slate-400 font-medium">Loading notifications inbox...</p>
             </div>
         );
     }
@@ -125,8 +125,8 @@ export default function NotificationsPage() {
                             )}
                         </div>
                         <div>
-                            <h1 className="text-xl font-black">مركز الإشعارات</h1>
-                            <p className="text-indigo-200 text-[10px] mt-0.5">تابع تحديثات طلباتك وعروضنا أولاً بأول</p>
+                            <h1 className="text-xl font-black">Notifications Center</h1>
+                            <p className="text-indigo-200 text-[10px] mt-0.5">Keep track of your orders and our latest offers</p>
                         </div>
                     </div>
                     
@@ -148,8 +148,8 @@ export default function NotificationsPage() {
                 {notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[300px] bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-8 text-center shadow-xs">
                         <Bell className="w-12 h-12 text-slate-300 dark:text-slate-700 mb-3" />
-                        <h3 className="text-slate-800 dark:text-white font-bold text-sm mb-1">صندوق الإشعارات فارغ</h3>
-                        <p className="text-slate-400 dark:text-slate-500 text-xs">ليست هناك أي تنبيهات أو رسائل مسجلة لك حالياً.</p>
+                        <h3 className="text-slate-800 dark:text-white font-bold text-sm mb-1">Notifications inbox is empty</h3>
+                        <p className="text-slate-400 dark:text-slate-500 text-xs">There are no alerts or messages recorded for you right now.</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
                                                 {n.title}
                                             </h3>
                                             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-mono shrink-0">
-                                                {n.createdAt ? new Date(n.createdAt).toLocaleDateString("ar-EG", {
+                                                {n.createdAt ? new Date(n.createdAt).toLocaleDateString("en-US", {
                                                     month: "short",
                                                     day: "numeric",
                                                     hour: "2-digit",

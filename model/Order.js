@@ -53,20 +53,8 @@ const orderSchema = new mongoose.Schema({
     
     paymentMethod: {
         type: String,
-        default: "Card",
-        enum: ["Card", "COD"]
-    },
-    
-    // إزالة required لمنع توقف السيرفر عند بداية عملية الدفع، مع الحفاظ على sparse للفهرسة الفريدة لاحقاً
-    stripeSessionId: { 
-        type: String, 
-        unique: true, 
-        sparse: true 
-    },
-    paymobOrderId: { 
-        type: String, 
-        unique: true, 
-        sparse: true 
+        default: "Kashier",
+        enum: ["Kashier", "COD"]
     },
     
 } , { timestamps: true });

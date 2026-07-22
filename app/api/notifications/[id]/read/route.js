@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
 import connectToMongo from "@/lib/db";
-import Notification from "@/model/Notfication"; // 🛠️ تم تصحيح الحروف الإملائية لاسم الملف والموديل هنا
+import Notification from "@/model/Notfication"; // 🛠️ تم تصحيح الحروف الإمNoئية Noسم الملف والموديل هنا
 
 export async function PUT(request, { params }) {
     try {
@@ -25,13 +25,13 @@ export async function PUT(request, { params }) {
 
         // 4. التحقق من وجود الإشعار
         if (!notification) {
-            return NextResponse.json({ success: false, message: "الإشعار غير موجود أو لا يخص هذا الحساب" }, { status: 404 });
+            return NextResponse.json({ success: false, message: "الإشعار غير موجود أو No يخص هذا الحساب" }, { status: 404 });
         }
 
-        // 5. إرجاع الرد بنجاح للـ Frontend ليعيد رندرة الأيقونات
+        // 5. إرجاع الرد بSuccess للـ Frontend ليعيد رندرة الأيقونات
         return NextResponse.json({ success: true, notification });
     } catch (error) {
         console.error("Error marking notification as read:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ في الخادم" }, { status: 500 });
+        return NextResponse.json({ success: false, message: "حدث Error في الخادم" }, { status: 500 });
     }
 }

@@ -17,7 +17,7 @@ export default function CartProvider({ children }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false); // 🛠️ حل مشكلة الـ Hydration
 
-  // 1. استرجاع بيانات السلة عند التحميل (مرة واحدة فقط)
+  // 1. استرجاع بيانات السلة عند الLoading (مرة واحدة فقط)
   useEffect(() => {
     const savedCart = localStorage.getItem('novacart_cart');
     if (savedCart) {
@@ -27,10 +27,10 @@ export default function CartProvider({ children }) {
         console.error("Error parsing cart data", e);
       }
     }
-    setIsMounted(true); // تأكيد اكتمال الـ Mount في المتصفح بسلام
+    setIsMounted(true); // تأكيد اكتمال الـ Mount في المتصفح بسNoم
   }, []);
 
-  // 2. 🛠️ حل ثغرة مسح السلة عند الـ Mount: لا نحفظ إلا بعد اكتمال الـ Mount الفعلي وتغير السلة
+  // 2. 🛠️ حل ثغرة مسح السلة عند الـ Mount: No نSave إNo بعد اكتمال الـ Mount الفعلي وتغير السلة
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem('novacart_cart', JSON.stringify(cart));
@@ -42,19 +42,19 @@ export default function CartProvider({ children }) {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item._id === product._id);
       
-      // الحصول على المخزن المتاح للمنتج (القيمة الافتراضية 99 لو الحقل غير متوفر)
+      // الحصول على المخزن المتاح للمنتج (القيمة اNoفتراضية 99 لو الحقل Out of Stock)
       const maxStock = product.stock !== undefined ? product.stock : 99;
 
       if (existingItem) {
         // Prevent adding more than 1 for digital products
         if (product.productType === 'digital_file' || product.productType === 'license_key') {
-          alert("المنتجات الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
+          alert("Products الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
           return prevCart;
         }
 
         const newQuantity = existingItem.quantity + quantity;
         
-        // إذا تخطت الكمية الجديدة المخزون المتاح، نثبتها عند الحد الأقصى للمخزون وننبه العميل
+        // إذا تخطت Quantity الجديدة المخزون المتاح، نثبتها عند الحد الأقصى للمخزون وننبه العميل
         if (newQuantity > maxStock) {
           alert(`عذراً، المخزون المتاح من هذا المنتج هو ${maxStock} فقط!`);
           return prevCart.map((item) =>
@@ -85,7 +85,7 @@ export default function CartProvider({ children }) {
     setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
   };
 
-  // 4. 🛡️ تأمين تحديث الكمية اليدوي مع فحص المخزن
+  // 4. 🛡️ تأمين تحديث Quantity اليدوي مع فحص المخزن
   const updateQuantity = (productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
@@ -96,12 +96,12 @@ export default function CartProvider({ children }) {
       prevCart.map((item) => {
         if (item._id === productId) {
           if ((item.productType === 'digital_file' || item.productType === 'license_key') && quantity > 1) {
-             alert("المنتجات الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
+             alert("Products الرقمية يمكن شراء قطعة واحدة منها فقط لكل طلب.");
              return { ...item, quantity: 1 };
           }
           const maxStock = item.stock !== undefined ? item.stock : 99;
           if (quantity > maxStock) {
-            alert(`نعتذر، لا يمكنك تخطي المخزون المتاح (${maxStock} قطعة).`);
+            alert(`نعتذر، No يمكنك تخطي المخزون المتاح (${maxStock} قطعة).`);
             return { ...item, quantity: maxStock };
           }
           return { ...item, quantity };

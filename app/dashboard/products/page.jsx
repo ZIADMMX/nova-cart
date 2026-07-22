@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 // ⚠️ انتبه: لقد أعدت المسار إلى componant (بحرف a) لأن المجلد الفعلي في ملفات المشروع لديك اسمه هكذا. 
-// إذا كان مكون AuthProviders لا يعمل، فتأكد من تغيير اسم المجلد الفعلي لديك من componant إلى components أولاً!
+// إذا كان مكون AuthProviders No يعمل، فتأكد من تغيير اسم المجلد الفعلي لديك من componant إلى components أوNoً!
 import { useAuth } from "@/components/providers/AuthProvider"; 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { 
     Package, Loader2, Plus, Trash2, Pencil, ArrowLeft, X, Check, AlertCircle, Save, ShoppingBag, Sparkles
-} from "lucide-react"; // 🛠️ تنظيف الاستيرادات وحذف التكرار والأسماء الخاطئة
+} from "lucide-react"; // 🛠️ تنظيف اNoستيرادات وDelete التكرار والأسماء الخاطئة
 
 export default function ProductsPage() {
     const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -31,7 +31,7 @@ export default function ProductsPage() {
     const [total, setTotal] = useState(0);
     const limit = 10;
 
-    // 🛠️ تم تعديل الحقل القياسي ليكون stock ليتطابق مع الـ Payload بالأسفل
+    // 🛠️ تم Edit الحقل القياسي ليكون stock ليتطابق مع الـ Payload بالأسفل
     const [formData, setFormData] = useState({
         title: "",
         price: "",
@@ -172,7 +172,7 @@ export default function ProductsPage() {
 
     const handleGenerateAIDescription = async () => {
         if (!formData.title) {
-            setError("يرجى كتابة اسم المنتج أولاً لتوليد الوصف");
+            setError("يرجى كتابة اسم المنتج أوNoً لتوليد الوصف");
             return;
         }
         
@@ -194,10 +194,10 @@ export default function ProductsPage() {
             if (res.ok && data.description) {
                 setFormData(prev => ({ ...prev, description: data.description }));
             } else {
-                setError(data.message || "فشل توليد الوصف بالذكاء الاصطناعي");
+                setError(data.message || "فشل توليد الوصف بالذكاء اNoصطناعي");
             }
         } catch (err) {
-            setError("حدث خطأ أثناء الاتصال بالذكاء الاصطناعي");
+            setError("Error occurred أثناء Connection بالذكاء اNoصطناعي");
         } finally {
             setIsGeneratingAI(false);
         }
@@ -220,7 +220,7 @@ export default function ProductsPage() {
                     : []
             };
             
-            // 🛠️ تصحيح اسم متغير التعديل لـ productEditData المعرّف بالأعلى
+            // 🛠️ تصحيح اسم متغير الEdit لـ productEditData المعرّف بالأعلى
             const url = productEditData ? `/api/products/${productEditData._id}` : "/api/products"; 
 
             const response = await fetch(url, {
@@ -413,7 +413,7 @@ export default function ProductsPage() {
                                                     {product.isActive ? "Active" : "Draft"}
                                                 </span>
                                             </td>
-                                            {/* 🛠️ تم إزالة عمود تاريخ إنشاء المنتج الزائد لموازنة خلايا الـ Table */}
+                                            {/* 🛠️ تم إزالة عمود تاريخ إنشاء المنتج الزائد لموازنة خNoيا الـ Table */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 justify-end">
                                                     <button onClick={() => openModal(product)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors cursor-pointer">
@@ -490,7 +490,7 @@ export default function ProductsPage() {
                 )}
             </div>
 
-            {/* النافذة المنبثقة لإضافة وتعديل المنتجات */}
+            {/* النافذة المنبثقة لAdd وEdit Products */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col border border-gray-200 dark:border-gray-800 animate-in fade-in zoom-in-95 duration-200">
@@ -631,7 +631,7 @@ export default function ProductsPage() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Currency</label>
-                                        {/* 🛠️ تم إغلاق الـ select بشكل قياسي صحيح ليعمل الفلتر */}
+                                        {/* 🛠️ تم إغNoق الـ select بشكل قياسي صحيح ليعمل الفلتر */}
                                         <select
                                             value={formData.currency}
                                             onChange={(e) => setFormData({ ...formData, currency: e.target.value })}

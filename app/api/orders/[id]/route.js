@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectToMongo from "@/lib/db";
 import Product from "@/model/Product";
 import Order from "@/model/Order";
-import Notification from "@/model/Notfication"; // تم استيراد موديل الإشعارات بالاسم والمسار الصحيحين
+import Notification from "@/model/Notfication"; // تم استيراد موديل الNotifications باNoسم والمسار الصحيحين
 import { getAuthFromCookie } from "@/lib/auth";
 
 export async function GET(req, context) {
@@ -11,7 +11,7 @@ export async function GET(req, context) {
         const auth = await getAuthFromCookie();
         if (!auth || !auth.userId) {
             return NextResponse.json(
-                { success: false, message: "يرجى تسجيل الدخول أولاً" },
+                { success: false, message: "يرجى Sign In أوNoً" },
                 { status: 401 }
             );
         }
@@ -40,9 +40,9 @@ export async function GET(req, context) {
 
         return NextResponse.json({ success: true, order });
     } catch (error) {
-        console.error("❌ خطأ أثناء جلب الطلب:", error);
+        console.error("❌ Error أثناء جلب الطلب:", error);
         return NextResponse.json(
-            { success: false, message: "حدث خطأ داخلي في الخادم" },
+            { success: false, message: "حدث Error داخلي في الخادم" },
             { status: 500 }
         );
     }
@@ -53,11 +53,11 @@ export async function PATCH(req, context) {
         const { id } = await context.params;
         const { status } = await req.json();
 
-        // 1. التحقق من هوية وصلاحية المستخدم (أدمن أو سوبر أدمن فقط)
+        // 1. التحقق من هوية وصNoحية المستخدم (أدمن أو سوبر أدمن فقط)
         const auth = await getAuthFromCookie(); // تصحيح استدعاء الدالة بإضافة الأقواس ()
         if (!auth || (auth.role !== "admin" && auth.role !== "super_admin")) {
             return NextResponse.json(
-                { success: false, message: "غير مصرح لك لتعديل حالة الطلبات" },
+                { success: false, message: "غير مصرح لك لEdit حالة Orders" },
                 { status: 403 }
             );
         }
@@ -75,7 +75,7 @@ export async function PATCH(req, context) {
 
         // تم إزالة قيود التسلسل لإعطاء الأدمن حرية كاملة في تغيير الحالة
 
-        // 4. تحديث حالة الطلب وإرجاع المخزون في حال الإلغاء بعد الدفع
+        // 4. تحديث Order Status وإرجاع المخزون في حال الCancel بعد Checkout
         if (status === "Cancelled" && ["Pending", "Paid", "Processing", "Shipped"].includes(order.status)) {
             for (const item of order.orderItems) {
                 const productId = item.product?._id || item.product;
@@ -90,7 +90,7 @@ export async function PATCH(req, context) {
         order.status = status;
         await order.save();
 
-        // 5. إنشاء إشعار للمستخدم بتحديث حالة الطلب
+        // 5. إنشاء إشعار للمستخدم بتحديث Order Status
         await Notification.create({
             userId: order.user, // تصحيح اسم الحقل لـ userId ليتطابق مع الـ Schema
             message: `تم تحديث حالة طلبك رقم #${order._id.toString().slice(-8).toUpperCase()} إلى: ${status}`,
@@ -101,9 +101,9 @@ export async function PATCH(req, context) {
         return NextResponse.json({ success: true, order });
 
     } catch (error) {
-        console.error("❌ خطأ أثناء تحديث حالة الطلب:", error);
+        console.error("❌ Error أثناء تحديث Order Status:", error);
         return NextResponse.json(
-            { success: false, message: error.message || "حدث خطأ داخلي في الخادم" },
+            { success: false, message: error.message || "حدث Error داخلي في الخادم" },
             { status: 500 }
         );
     }

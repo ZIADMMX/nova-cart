@@ -8,6 +8,7 @@ import Image from "next/image";
 import BuyButton from "@/components/UI/buyButton";
 import AddToCartButton from "@/components/UI/AddToCartButton";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { formatPrice } from "@/lib/formatPrice";
 
 export default function ProductPage() {
     const params = useParams(); 
@@ -21,7 +22,7 @@ export default function ProductPage() {
     const [reviewError, setReviewError] = useState("");
     const [reviewSuccess, setReviewSuccess] = useState("");
 
-    // 1. تأمين الـ Hydration أولاً لمنع تعارض السيرفر والعميل
+    // 1. تأمين الـ Hydration أوNoً لمنع تعارض السيرفر والعميل
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -39,12 +40,12 @@ export default function ProductPage() {
             const data = await res.json();
             
             if (!res.ok) {
-                throw new Error(res.status === 404 ? "المنتج غير موجود" : "فشل في تحميل بيانات المنتج");
+                throw new Error(res.status === 404 ? "Product not found" : "Failed to load product data");
             }
             
             setProduct(data);
         } catch (err) {
-            setError(err.message || "حدث خطأ أثناء الاتصال بالخادم.");
+            setError(err.message || "An error occurred while connecting to the server.");
         } finally {
             setLoading(false);
         }
@@ -66,10 +67,10 @@ export default function ProductPage() {
             const data = await res.json();
             
             if (!res.ok) {
-                throw new Error(data.message || "حدث خطأ أثناء إضافة التقييم");
+                throw new Error(data.message || "An error occurred while adding the review");
             }
             
-            setReviewSuccess("تم إضافة تقييمك بنجاح!");
+            setReviewSuccess("Your review has been added successfully!");
             setProduct(data.product); // Update product to show new review
             setReviewForm({ rating: 5, comment: "" });
         } catch (err) {
@@ -79,12 +80,12 @@ export default function ProductPage() {
         }
     };
 
-    // شاشة التحميل القياسية أثناء جلب البيانات أو انتظار الـ Mounted
+    // شاشة الLoading القياسية أثناء جلب البيانات أو انتظار الـ Mounted
     if (!mounted || loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
                 <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">جارٍ تحميل تفاصيل المنتج...</p>
+                <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">Loading Product Details...</p>
             </div>
         );
     }
@@ -94,14 +95,14 @@ export default function ProductPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 p-4">
                 <AlertOctagon className="h-12 w-12 text-red-600 mb-4" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">تنبيه</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Notice</h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{error}</p>
                 <Link
                     href="/products"
                     className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-bold transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    العودة للتسوق تصفح المنتجات
+                    Back to shop
                 </Link>
             </div>
         );
@@ -112,10 +113,10 @@ export default function ProductPage() {
     return (
         <div className="bg-gray-100 p-6 sm:p-8 dark:bg-gray-950 min-h-screen">
             <div className="max-w-7xl mx-auto">
-                {/* تم إضافة الـ href بنجاح وإغلاق الوسوم */}
+                {/* تم إضافة الـ href بSuccess وإغNoق الوسوم */}
                 <Link href="/products" className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 mb-6 transition-colors font-medium">
                     <ArrowLeft className="h-5 w-5" />
-                    <span>العودة للمتجر</span>
+                    <span>Back to Store</span>
                 </Link>
 
                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800/80 overflow-hidden">
@@ -147,27 +148,27 @@ export default function ProductPage() {
                                         <span>{product.rating ? product.rating.toFixed(1) : "0.0"} ({product.numReviews || 0})</span> 
                                     </div>
                                     
-                                    {/* إصلاح منطق فحص وحقن المخزون والأيقونات */}
+                                    {/* إصNoح منطق فحص وحقن المخزون والأيقونات */}
                                     {product.stock >= 1 ? (
                                         <span className="text-green-600 dark:text-green-400 font-semibold text-xs flex items-center gap-1">
-                                            <CheckCircle className="w-4 h-4" /> متوفر في المخزن ({product.stock})
+                                            <CheckCircle className="w-4 h-4" /> In Stock ({product.stock})
                                         </span>
                                     ) : (
                                         <span className="text-red-500 font-semibold text-xs flex items-center gap-1">
-                                            <AlertOctagon className="w-4 h-4" /> نفذت الكمية
+                                            <AlertOctagon className="w-4 h-4" /> Out of Stock
                                         </span>
                                     )}
                                 </div>
 
                                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed pt-2">
-                                    {product.description || "لا يوجد وصف متوفر لهذا المنتج حالياً في متجرنا."}
+                                    {product.description || "No description available for this product."}
                                 </p>
                             </div>
 
                             <div className="border-t border-slate-100 dark:border-slate-800 pt-6 mt-6">
                                 <div className="mb-6">
                                     <span className="text-2xl font-black text-gray-950 dark:text-white">
-                                        {product.price ? product.price.toFixed(2) : "0.00"} {product.currency || "ر.س"}
+                                        {formatPrice(product.price, product.currency || "EGP")}
                                     </span>
                                 </div>
                                 
@@ -181,7 +182,7 @@ export default function ProductPage() {
                                         disabled
                                         className="w-full py-3.5 bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 font-bold rounded-xl cursor-not-allowed text-sm transition-all"
                                     >
-                                        انتهى من المخزن
+                                        Out of Stock
                                     </button>
                                 )}
                             </div>
@@ -192,7 +193,7 @@ export default function ProductPage() {
 
                 {/* Reviews Section */}
                 <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-800/80 p-6 sm:p-8">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">التقييمات والمراجعات</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Reviews</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
@@ -221,40 +222,40 @@ export default function ProductPage() {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-10 bg-slate-50 dark:bg-slate-950 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                                     <Star className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-2" />
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">لا توجد تقييمات حتى الآن، كن أول من يقيم هذا المنتج!</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">No reviews yet, be the first to review!</p>
                                 </div>
                             )}
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">أضف تقييمك</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Add your review</h3>
                             {isAuthenticated ? (
                                 <form onSubmit={handleReviewSubmit} className="space-y-4 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-100 dark:border-slate-800">
                                     {reviewError && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100">{reviewError}</div>}
                                     {reviewSuccess && <div className="p-3 bg-green-50 text-green-600 text-xs font-bold rounded-lg border border-green-100">{reviewSuccess}</div>}
                                     
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-2">التقييم (من 1 لـ 5)</label>
+                                        <label className="block text-xs font-bold text-slate-500 mb-2">Rating (1 to 5)</label>
                                         <select 
                                             value={reviewForm.rating} 
                                             onChange={(e) => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
                                             className="w-full bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                                         >
-                                            <option value={5}>5 - ممتاز جداً</option>
-                                            <option value={4}>4 - جيد جداً</option>
-                                            <option value={3}>3 - متوسط</option>
-                                            <option value={2}>2 - سيء</option>
-                                            <option value={1}>1 - سيء جداً</option>
+                                            <option value={5}>5 - Excellent</option>
+                                            <option value={4}>4 - Very Good</option>
+                                            <option value={3}>3 - Average</option>
+                                            <option value={2}>2 - Bad</option>
+                                            <option value={1}>1 - Very Bad</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-2">تعليقك</label>
+                                        <label className="block text-xs font-bold text-slate-500 mb-2">Your Comment</label>
                                         <textarea 
                                             value={reviewForm.comment}
                                             onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
                                             required
                                             rows={3}
-                                            placeholder="اكتب تجربتك مع المنتج..."
+                                            placeholder="Write your experience with the product..."
                                             className="w-full resize-none bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                                         />
                                     </div>
@@ -264,14 +265,14 @@ export default function ProductPage() {
                                         className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                                     >
                                         {reviewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                        نشر التقييم
+                                        Submit Review
                                     </button>
                                 </form>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-8 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800">
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">يجب تسجيل الدخول لتتمكن من التقييم</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">You must Sign In to submit a review</p>
                                     <Link href="/auth/login" className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors">
-                                        تسجيل الدخول
+                                        Sign In
                                     </Link>
                                 </div>
                             )}

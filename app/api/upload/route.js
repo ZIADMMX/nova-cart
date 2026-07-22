@@ -8,13 +8,13 @@ export async function POST(req) {
         const file = formData.get("file");
 
         if (!file) {
-            return NextResponse.json({ success: false, message: "لم يتم تحميل أي ملف" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "لم يتم Loading أي ملف" }, { status: 400 });
         }
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // إنشاء مسار الحفظ في المجلد public/uploads
+        // إنشاء مسار الSave في المجلد public/uploads
         const uploadDir = path.join(process.cwd(), "public", "uploads");
         
         // التأكد من وجود المجلد
@@ -26,7 +26,7 @@ export async function POST(req) {
         const filename = `${uniqueSuffix}${fileExtension}`;
         const filePath = path.join(uploadDir, filename);
 
-        // حفظ الملف
+        // Save الملف
         await writeFile(filePath, buffer);
 
         // إرجاع المسار النسبي الذي يمكن للمتصفح الوصول إليه
@@ -34,7 +34,7 @@ export async function POST(req) {
 
         return NextResponse.json({ success: true, url: fileUrl });
     } catch (error) {
-        console.error("❌ خطأ أثناء رفع الملف:", error);
-        return NextResponse.json({ success: false, message: "حدث خطأ أثناء رفع الملف" }, { status: 500 });
+        console.error("❌ Error أثناء رفع الملف:", error);
+        return NextResponse.json({ success: false, message: "حدث Error أثناء رفع الملف" }, { status: 500 });
     }
 }

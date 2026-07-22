@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatPrice } from "@/lib/formatPrice";
 
 export default function Product({product}) {
     return(
@@ -36,7 +37,7 @@ export default function Product({product}) {
                             
                                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
                                     <span className="text-lg font-bold text-gray-900 dark:text-white">
-                                        ${product.price.toFixed(2)}
+                                        {formatPrice(product.price, product.currency || "EGP")}
                                     </span>
                                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                                         product.stock > 0 
