@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { getJwtSecret } from "@/lib/auth";
 
 const protectedRoutes = ["/profile", "/cart", "/checkout", "/notifications", "/orders", "/order", "/chat"];
+
+const secretKey = process.env.JWT_SECRET || "novacart_dev_secret_2026";
+const secret = new TextEncoder().encode(secretKey);
 const adminRoutes = ["/admin", "/dashboard"];
 const superAdminRoutes = ["/superadmin"];
 const authPaths = ["/auth/login", "/auth/register", "/auth/forget-password", "/auth/reset-password"];
 
 // 🛠️ تحسين الأداء: تهيئة الـ Secret مرة واحدة خارج الدالة لكي لا يستهلك السيرفر مع كل Request
-const secret = new TextEncoder().encode(getJwtSecret());
 
 export default async function authMiddleware(req) {
     const { pathname } = req.nextUrl;
