@@ -16,10 +16,10 @@ export async function GET(request) {
         const totalProducts = await Product.countDocuments();
         const totalOrders = await Order.countDocuments();
         
-        const paidOrders =  await Order.find({status: { $in: ["Paid", "Delivered"] }}); 
+        const paidOrders =  await Order.find({status: { $in: ["Paid", "Delivered"] }}).select("totalPrice").lean(); 
         const  totalRevenue = paidOrders.reduce((acc,order)=> acc + (order.totalPrice || 0), 0);   
         const recentOrders = await Order.find()
-            .sort({createdAt: -1}).limit(5).populate("user", "name email");
+            .sort({createdAt: -1}).limit(5).populate("user", "name email").lean();
         
         return NextResponse.json({
             totalUsers,

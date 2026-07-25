@@ -69,7 +69,8 @@ export async function GET(request) {
         const recentOrders = await Order.find({})
             .sort({ createdAt: -1 }) // الترتيب تنازلياً (الأحدث أوNoً)
             .limit(5)                // 5 طلبات فقط
-            .populate("user", "name email"); // نجلب اسم واسم مستخدم المشتري لعرضه
+            .populate("user", "name email") // نجلب اسم واسم مستخدم المشتري لعرضه
+            .lean();
 
         // 6. Low Stock Alerts (تنبيهات نقص المخزون): جلب Products التي قاربت على النفاذ (WOW Factor)
         const lowStockProducts = await Product.find({ stock: { $lte: 5, $gte: 0 } })
