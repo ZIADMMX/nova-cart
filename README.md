@@ -29,7 +29,7 @@ NovaCart is a high-performance, modern e-commerce platform built with Next.js 14
    ```env
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
-   NEXT_PUBLIC_URL=http://localhost:3000
+   NEXT_PUBLIC_URL=https://nova-cart-lake.vercel.app
    STRIPE_SECRET_KEY=your_stripe_secret
    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
