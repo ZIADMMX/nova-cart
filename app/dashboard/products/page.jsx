@@ -40,10 +40,7 @@ export default function ProductsPage() {
         category: "",
         imageUrl: "",
         stock: "",
-        isActive: true,
-        productType: "physical",
-        downloadUrl: "",
-        licenseKeysPool: ""
+        isActive: true
     });
 
     useEffect(() => {
@@ -114,10 +111,7 @@ export default function ProductsPage() {
                 category: product.category || "",
                 imageUrl: product.imageUrl || "",
                 stock: product.stock?.toString() || "0",
-                isActive: product.isActive ?? true,
-                productType: product.productType || "physical",
-                downloadUrl: product.downloadUrl || "",
-                licenseKeysPool: product.licenseKeysPool ? product.licenseKeysPool.join("\n") : ""
+                isActive: product.isActive ?? true
             });
         } else {
             setProductEditData(null);
@@ -129,10 +123,7 @@ export default function ProductsPage() {
                 category: "",
                 imageUrl: "",
                 stock: "",
-                isActive: true,
-                productType: "physical",
-                downloadUrl: "",
-                licenseKeysPool: ""
+                isActive: true
             });
         }
         setError(null);
@@ -212,12 +203,7 @@ export default function ProductsPage() {
             const payload = {
                 ...formData,
                 price: parseFloat(formData.price),
-                stock: formData.productType === 'license_key' 
-                    ? (formData.licenseKeysPool ? formData.licenseKeysPool.split("\n").filter(k => k.trim()).length : 0)
-                    : (formData.productType === 'digital_file' ? 999999 : parseInt(formData.stock, 10)),
-                licenseKeysPool: formData.productType === 'license_key' && formData.licenseKeysPool 
-                    ? formData.licenseKeysPool.split("\n").map(k => k.trim()).filter(k => k) 
-                    : []
+                stock: parseInt(formData.stock, 10) || 0
             };
             
             // 🛠️ تصحيح اسم متغير الEdit لـ productEditData المعرّف بالأعلى
@@ -559,21 +545,6 @@ export default function ProductsPage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Product Type</label>
-                                        <select
-                                            value={formData.productType}
-                                            onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
-                                            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm outline-none text-gray-900 dark:text-white cursor-pointer font-medium"
-                                        >
-                                            <option value="physical">Physical Product</option>
-                                            <option value="digital_file">Digital File</option>
-                                            <option value="license_key">License Key(s)</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {formData.productType === 'physical' && (
-                                    <div>
                                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Stock Quantity</label>
                                         <input
                                             type="number"
@@ -581,41 +552,11 @@ export default function ProductsPage() {
                                             min="0"
                                             value={formData.stock}
                                             onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                                            required={formData.productType === 'physical'}
+                                            required
                                             className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                                         />
                                     </div>
-                                )}
-
-                                {formData.productType === 'digital_file' && (
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Download URL (Secure Link)</label>
-                                        <input
-                                            type="url"
-                                            value={formData.downloadUrl}
-                                            onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
-                                            placeholder="https://example.com/file.zip"
-                                            required={formData.productType === 'digital_file'}
-                                            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
-                                        />
-                                        <p className="text-[10px] text-gray-400 mt-1">Customers will download this file after purchase.</p>
-                                    </div>
-                                )}
-
-                                {formData.productType === 'license_key' && (
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">License Keys (One per line)</label>
-                                        <textarea
-                                            value={formData.licenseKeysPool}
-                                            onChange={(e) => setFormData({ ...formData, licenseKeysPool: e.target.value })}
-                                            placeholder="XXXX-XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY-YYYY"
-                                            rows={4}
-                                            required={formData.productType === 'license_key'}
-                                            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white font-mono"
-                                        />
-                                        <p className="text-[10px] text-gray-400 mt-1">Stock will be automatically calculated based on the number of keys.</p>
-                                    </div>
-                                )}
+                                </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>

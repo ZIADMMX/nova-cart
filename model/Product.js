@@ -16,13 +16,6 @@ const productSchema = new mongoose.Schema({
     imageUrl : {type : String , required : true },
     stock : {type : Number , required : true , default : 0 , min : 0}, 
     isActive : {type : Boolean , default : true },
-    productType: { 
-        type: String, 
-        enum: ['physical', 'digital_file', 'license_key'], 
-        default: 'physical' 
-    },
-    downloadUrl: { type: String, default: "" }, // for digital_file
-    licenseKeysPool: [{ type: String }], // for license_key
     reviews: [reviewSchema],
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
