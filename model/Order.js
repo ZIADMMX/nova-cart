@@ -53,9 +53,19 @@ const orderSchema = new mongoose.Schema({
     
     paymentMethod: {
         type: String,
-        default: "Kashier",
-        enum: ["Kashier", "COD"]
+        default: "Stripe",
+        enum: ["Stripe", "COD"]
     },
+    
+    couponCode: {
+        type: String,
+        default: null
+    },
+    
+    discountAmount: {
+        type: Number,
+        default: 0
+    }
     
 } , { timestamps: true });
 

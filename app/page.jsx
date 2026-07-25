@@ -172,12 +172,7 @@ export default async function Home() {
                 </div>
             </section>
 
-            <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
-                <div className="rounded-2xl border border-amber-200/70 bg-amber-50/80 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
-                    <span className="font-black">السعر المعروض: </span>
-                    جميع الأسعار بالعملة المحلية بالجنيه المصري (ج.م) مع عرض واضح للمنتج وسياسة الاستبدال والاسترجاع.
-                </div>
-            </section>
+
 
             {/* Why Choose Us Section */}
             <section className="py-20 lg:py-24 bg-slate-900/30 border-y border-slate-900 relative">

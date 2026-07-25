@@ -11,18 +11,18 @@ export async function POST(request) {
         const ip = request.headers.get('x-forwarded-for') || request.ip || '127.0.0.1';
         const rateLimitResult = rateLimit(ip);
         if (!rateLimitResult.allowed) {
-            return NextResponse.json({ success: false, message: 'تم حظر طلبك مؤقتاً بسبب كثرة المحاوNoت.' }, { status: 429 });
+            return NextResponse.json({ success: false, message: 'تم حظر طلبك مؤقتاً بسبب كثرة المحاولات.' }, { status: 429 });
         }
 
         // 1. استقبال البيانات والتحقق من اكتمالها
         const { name, email, password } = await request.json();
         
         if (!name || !email || !password) {
-            return NextResponse.json({ success: false, message: "البيانات غير Completedة" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "البيانات غير مكتملة" }, { status: 400 });
         }
 
         if (password.length < 6) {
-            return NextResponse.json({ success: false, message: "Password يجب أNo تقل عن 6 أحرف" }, { status: 400 });
+            return NextResponse.json({ success: false, message: "كلمة المرور يجب ألا تقل عن 6 أحرف" }, { status: 400 });
         }
 
         // 2. اNoتصال بقاعدة البيانات الآمن والمحمي بالكاش

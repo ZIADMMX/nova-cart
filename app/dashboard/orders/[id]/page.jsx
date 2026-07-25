@@ -242,8 +242,8 @@ export default function OrderDetailsPage({ params: paramsPromise }) {
                                 <span className="text-indigo-400 font-bold flex items-center gap-1">
                                     {order.paymentMethod === "COD"
                                         ? "Cash on Delivery (COD)"
-                                        : order.paymentMethod === "Kashier"
-                                            ? "Credit Card (Kashier)"
+                                        : order.paymentMethod === "Stripe"
+                                            ? "Credit Card (Stripe)"
                                             : order.paymentMethod || "Credit Card"
                                     }
                                     <CreditCard className="w-4 h-4" />

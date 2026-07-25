@@ -172,7 +172,7 @@ export default function ProductsPage() {
 
     const handleGenerateAIDescription = async () => {
         if (!formData.title) {
-            setError("يرجى كتابة اسم المنتج أوNoً لتوليد الوصف");
+            setError("Please enter a product title first to generate description");
             return;
         }
         
@@ -194,10 +194,10 @@ export default function ProductsPage() {
             if (res.ok && data.description) {
                 setFormData(prev => ({ ...prev, description: data.description }));
             } else {
-                setError(data.message || "فشل توليد الوصف بالذكاء اNoصطناعي");
+                setError(data.message || "Failed to generate AI description");
             }
         } catch (err) {
-            setError("Error occurred أثناء Connection بالذكاء اNoصطناعي");
+            setError("Error connecting to AI service");
         } finally {
             setIsGeneratingAI(false);
         }
@@ -638,8 +638,8 @@ export default function ProductsPage() {
                                             className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm outline-none text-gray-900 dark:text-white cursor-pointer font-medium"
                                         >
                                             <option value="USD">USD ($)</option>
-                                            <option value="EGP">EGP (ج.م)</option>
-                                            <option value="SAR">SAR (ر.س)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
                                         </select>
                                     </div>
                                 </div>

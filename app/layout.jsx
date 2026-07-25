@@ -73,11 +73,9 @@ export default function RootLayout({ children }) {
               <main>{children}</main>
               <footer className="border-t border-slate-200/70 bg-white/80 py-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-400">
                 <div className="mx-auto flex flex-wrap items-center justify-center gap-4 px-4">
-                  <Link href="/policy" className="font-medium hover:text-indigo-600 dark:hover:text-indigo-400">سياسة الاستبدال والاسترجاع</Link>
+                  <Link href="/policy" className="font-medium hover:text-indigo-600 dark:hover:text-indigo-400">Return & Refund Policy</Link>
                   <span>•</span>
-                  <span>Refund Policy • 01286622370</span>
-                  <span>•</span>
-                  <span>ziad89067@gmail.com</span>
+                  <span>© {new Date().getFullYear()} NovaCart. All rights reserved.</span>
                 </div>
               </footer>
               <ToastContainer position="bottom-right" />

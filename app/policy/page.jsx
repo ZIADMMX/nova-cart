@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, RotateCcw, ShieldCheck, RefreshCw, Phone, Mail, MapPin, BadgeCheck } from "lucide-react";
+import { ArrowLeft, RotateCcw, ShieldCheck, RefreshCw, BadgeCheck } from "lucide-react";
 
 export default function PolicyPage() {
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-gray-950 py-12 px-4" dir="rtl">
+    <main className="min-h-screen bg-slate-50 dark:bg-gray-950 py-12 px-4">
       <div className="max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 md:p-10">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-8">
-          <ArrowLeft className="w-4 h-4" /> العودة للمتجر
+          <ArrowLeft className="w-4 h-4" /> Back to Store
         </Link>
 
         <div className="flex items-center gap-3 mb-6">
@@ -14,8 +14,8 @@ export default function PolicyPage() {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">سياسة الاستبدال والاسترجاع</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">جميع التفاصيل الخاصة بالاستبدال والاسترجاع وملف Refund Policy</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Return & Refund Policy</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">All details related to exchanges, returns, and our refund policy.</p>
           </div>
         </div>
 
@@ -23,24 +23,24 @@ export default function PolicyPage() {
           <section className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
             <div className="flex items-center gap-2 mb-3">
               <RotateCcw className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-lg font-black text-slate-900 dark:text-white">الاستبدال</h2>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white">Exchange Policy</h2>
             </div>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              <li>• يتم قبول الاستبدال خلال 7 أيام من تاريخ استلام الطلب.</li>
-              <li>• يجب أن يكون المنتج بحالته الأصلية وغير مستخدم.</li>
-              <li>• في حالة وجود عيب صناعي أو منتج خاطئ يتم الاستبدال مجاناً.</li>
+              <li>• Exchanges are accepted within 7 days of receiving your order.</li>
+              <li>• The product must be in its original condition and unused.</li>
+              <li>• In case of a manufacturing defect or incorrect item, exchange is free of charge.</li>
             </ul>
           </section>
 
           <section className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
             <div className="flex items-center gap-2 mb-3">
-              <RefreshCw className="w-5 h-5 text-amber-600" />
-              <h2 className="text-lg font-black text-slate-900 dark:text-white">الاسترجاع</h2>
+              <RotateCcw className="w-5 h-5 text-amber-600" />
+              <h2 className="text-lg font-black text-slate-900 dark:text-white">Return Policy</h2>
             </div>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              <li>• يتم استرجاع المبلغ خلال 3-7 أيام عمل بعد تأكيد الاسترجاع.</li>
-              <li>• يتم استرجاع المبلغ بنفس طريقة الدفع المستخدمة.</li>
-              <li>• لا يتم قبول الاسترجاع في حالة استخدام المنتج أو فقد العبوة الأصلية.</li>
+              <li>• Refunds are processed within 3–7 business days after the return is confirmed.</li>
+              <li>• The refund will be issued using the same payment method used at checkout.</li>
+              <li>• Returns are not accepted if the product has been used or the original packaging is missing.</li>
             </ul>
           </section>
         </div>
@@ -51,17 +51,13 @@ export default function PolicyPage() {
             <h2 className="text-lg font-black text-slate-900 dark:text-white">Refund Policy</h2>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            إذا كان هناك مشكلة في المنتج أو تأخر في التوصيل أو تم استلام منتج غير مطابق للطلب، يرجى التواصل معنا فوراً وسنقوم بدراسة الطلب وتقديم الحل المناسب. يتم إصدار الرصيد أو الاسترداد بعد مراجعة الطلب من خلال فريق الدعم.
+            If there is an issue with a product, a delayed delivery, or if you received an incorrect item, please contact us immediately. Our support team will review your request and provide the appropriate solution. Refunds or store credits are issued after case review.
           </p>
         </section>
 
         <section className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4">بيانات التواصل</h2>
-          <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-600" /> <span>01286622370</span></div>
-            <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-indigo-600" /> <span>ziad89067@gmail.com</span></div>
-            <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-indigo-600" /> <span>الإسكندرية - المنتزه العصافرة ش30 الجديد</span></div>
-          </div>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white mb-2">Contact Support</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">For any inquiries or return requests, please reach out via the contact form on our website or through our support email configured in your store settings.</p>
         </section>
       </div>
     </main>

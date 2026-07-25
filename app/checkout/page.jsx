@@ -40,8 +40,14 @@ function CheckoutContent() {
         postalCode: ""
     });
     
-    const [paymentMethod, setPaymentMethod] = useState("COD"); // COD أو Kashier
+    const [paymentMethod, setPaymentMethod] = useState("Stripe"); // COD أو Stripe
     const [errorMsg, setErrorMsg] = useState("");
+
+    // Coupon states
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    const [couponError, setCouponError] = useState("");
+    const [applyingCoupon, setApplyingCoupon] = useState(false);
 
     // حماية المسار
     useEffect(() => {
@@ -98,10 +104,51 @@ function CheckoutContent() {
     };
 
     const calculateTotal = () => {
+        let total = 0;
         if (productId) {
-            return purchaseItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            total = purchaseItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        } else {
+            total = cartTotal;
         }
-        return cartTotal;
+        return total;
+    };
+
+    const getDiscountAmount = (total) => {
+        if (!appliedCoupon) return 0;
+        if (appliedCoupon.type === 'percentage') {
+            return (total * appliedCoupon.value) / 100;
+        } else if (appliedCoupon.type === 'fixed') {
+            return appliedCoupon.value;
+        }
+        return 0; // free_shipping not affecting subtotal here
+    };
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setApplyingCoupon(true);
+        setCouponError("");
+        try {
+            const res = await fetch("/api/coupons/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    couponCode: couponCode.trim(),
+                    orderAmount: calculateTotal()
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setAppliedCoupon(data.coupon);
+                setCouponError("");
+            } else {
+                setCouponError(data.error || "كوبون غير صالح");
+                setAppliedCoupon(null);
+            }
+        } catch (error) {
+            setCouponError("حدث خطأ أثناء التحقق من الكوبون");
+        } finally {
+            setApplyingCoupon(false);
+        }
     };
 
     const handleSubmitOrder = async (e) => {
@@ -129,7 +176,8 @@ function CheckoutContent() {
                 body: JSON.stringify({
                     items: purchaseItems,
                     shippingAddress: shippingForm,
-                    paymentMethod
+                    paymentMethod,
+                    couponCode: appliedCoupon ? appliedCoupon.code : null
                 })
             });
 
@@ -165,7 +213,9 @@ function CheckoutContent() {
         );
     }
 
-    const totalToPay = calculateTotal();
+    const subTotal = calculateTotal();
+    const discountAmount = getDiscountAmount(subTotal);
+    const totalToPay = Math.max(0, subTotal - discountAmount);
 
     if (purchaseItems.length === 0) {
         return (
@@ -312,7 +362,7 @@ function CheckoutContent() {
 
                                     <label 
                                         className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                                            paymentMethod === "Kashier" 
+                                            paymentMethod === "Stripe" 
                                             ? "border-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20" 
                                             : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                                         }`}
@@ -320,17 +370,17 @@ function CheckoutContent() {
                                         <input 
                                             type="radio" 
                                             name="paymentMethod" 
-                                            value="Kashier" 
-                                            checked={paymentMethod === "Kashier"} 
-                                            onChange={() => setPaymentMethod("Kashier")}
+                                            value="Stripe" 
+                                            checked={paymentMethod === "Stripe"} 
+                                            onChange={() => setPaymentMethod("Stripe")}
                                             className="hidden"
                                         />
                                         <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center shrink-0">
                                             <CreditCard className="w-5 h-5 text-indigo-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white">Kashier (Visa/Mastercard)</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Secure checkout through Kashier payment gateway</p>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">Stripe (Visa/Mastercard)</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Secure checkout through Stripe payment gateway</p>
                                         </div>
                                     </label>
                                 </div>
@@ -348,7 +398,7 @@ function CheckoutContent() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Confirm and buy order for {formatPrice(totalToPay, "EGP")}</span>
+                                        <span>Confirm and buy order for {formatPrice(totalToPay, "USD")}</span>
                                     </>
                                 )}
                             </button>
@@ -383,18 +433,70 @@ function CheckoutContent() {
                                 ))}
                             </div>
 
+                            {/* Coupon Input Area */}
+                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Have a Coupon Code?</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Enter coupon code"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                        disabled={appliedCoupon !== null}
+                                        className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500 dark:text-white font-bold disabled:opacity-50"
+                                    />
+                                    {appliedCoupon ? (
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setAppliedCoupon(null);
+                                                setCouponCode("");
+                                            }}
+                                            className="px-4 py-3 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-xl transition-all text-sm"
+                                        >
+                                            إزالة
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            type="button"
+                                            onClick={handleApplyCoupon}
+                                            disabled={applyingCoupon || !couponCode.trim()}
+                                            className="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-sm disabled:opacity-50"
+                                        >
+                                            {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                                        </button>
+                                    )}
+                                </div>
+                                {couponError && (
+                                    <p className="text-red-500 text-xs font-bold mt-1">{couponError}</p>
+                                )}
+                                {appliedCoupon && (
+                                    <p className="text-green-500 text-xs font-bold mt-1">تم تطبيق الخصم بنجاح!</p>
+                                )}
+                            </div>
+
                             <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
                                 <div className="flex justify-between text-sm font-bold text-slate-500 dark:text-slate-400">
                                     <span>Subtotal</span>
-                                    <span>${totalToPay.toFixed(2)}</span>
+                                    <span>{formatPrice(subTotal, "USD")}</span>
                                 </div>
+                                
+                                {discountAmount > 0 && (
+                                    <div className="flex justify-between text-sm font-bold text-green-600 dark:text-green-400">
+                                        <span>Discount ({appliedCoupon?.code})</span>
+                                        <span>- {formatPrice(discountAmount, "USD")}</span>
+                                    </div>
+                                )}
+
                                 <div className="flex justify-between text-sm font-bold text-slate-500 dark:text-slate-400">
                                     <span>Shipping Fees</span>
-                                    <span className="text-green-600 dark:text-green-400">Free</span>
+                                    <span className="text-green-600 dark:text-green-400">
+                                        {appliedCoupon?.type === 'free_shipping' ? 'Free (Coupon)' : 'Free'}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between text-lg font-black text-slate-900 dark:text-white pt-3 border-t border-slate-100 dark:border-slate-800">
                                     <span>Total</span>
-                                    <span>${totalToPay.toFixed(2)}</span>
+                                    <span>{formatPrice(totalToPay, "USD")}</span>
                                 </div>
                             </div>
                         </div>

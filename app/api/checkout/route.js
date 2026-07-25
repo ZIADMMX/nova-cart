@@ -3,9 +3,11 @@ import connectToMongo from "@/lib/db";
 import Product from "@/model/Product";
 import Order from "@/model/Order";
 import User from "@/model/User";
+import Coupon from "@/model/Coupon";
 import { getAuthFromCookie } from "@/lib/auth";
-import crypto from "crypto";
+import Stripe from "stripe";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
 
 const rateLimitMap = new Map();
 
@@ -46,7 +48,7 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { items, shippingAddress, paymentMethod } = body;
+        const { items, shippingAddress, paymentMethod, couponCode } = body;
 
         // 1. التحقق من البيانات
         if (!items || !items.length) {
@@ -57,7 +59,7 @@ export async function POST(request) {
             return NextResponse.json({ error: "جميع بيانات الShipping مطلوبة" }, { status: 400 });
         }
 
-        if (!["COD", "Kashier"].includes(paymentMethod)) {
+        if (!["COD", "Stripe"].includes(paymentMethod)) {
             return NextResponse.json({ error: "طريقة Checkout غير صالحة" }, { status: 400 });
         }
 
@@ -100,13 +102,51 @@ export async function POST(request) {
             });
         }
 
+        let discountAmount = 0;
+        let appliedCoupon = null;
+
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+            
+            if (coupon && new Date() <= new Date(coupon.expiryDate)) {
+                if ((!coupon.usageLimit || coupon.usageCount < coupon.usageLimit) && 
+                    (coupon.minOrderAmount === 0 || totalPrice >= coupon.minOrderAmount)) {
+                    
+                    if (coupon.type === 'percentage') {
+                        discountAmount = (totalPrice * coupon.value) / 100;
+                    } else if (coupon.type === 'fixed') {
+                        discountAmount = coupon.value;
+                    } else if (coupon.type === 'free_shipping') {
+                        // Assuming shipping is handled, for now we just mark it.
+                        // If there is a fixed shipping cost, discountAmount = shippingCost
+                        discountAmount = 0; // Or whatever shipping cost is
+                    }
+                    
+                    // Ensure discount doesn't exceed total price
+                    if (discountAmount > totalPrice) {
+                        discountAmount = totalPrice;
+                    }
+                    
+                    appliedCoupon = coupon;
+                    
+                    // Increment usage count
+                    coupon.usageCount += 1;
+                    await coupon.save();
+                }
+            }
+        }
+
+        const finalPrice = totalPrice - discountAmount;
+
         // 3. إنشاء الطلب في قاعدة البيانات
         const order = new Order({
             user: auth.userId,
             orderItems,
-            totalPrice,
+            totalPrice: finalPrice, // Save final price
             shippingAddress,
             paymentMethod,
+            couponCode: appliedCoupon ? appliedCoupon.code : null,
+            discountAmount,
             status: "Pending", // كNoهما يبدأ كـ Pending
         });
 
@@ -121,40 +161,53 @@ export async function POST(request) {
             });
         }
 
-        const kashierSecretKey = process.env.KASHIER_SECRET_KEY || process.env.KASHIER_API_KEY;
-        const kashierMid = process.env.KASHIER_MID;
 
-        if (paymentMethod === "Kashier") {
-            if (!kashierSecretKey || !kashierMid) {
-                return NextResponse.json({ error: "Kashier payment is not configured. تحقق من KASHIER_SECRET_KEY و KASHIER_MID." }, { status: 500 });
+        if (paymentMethod === "Stripe") {
+            if (!process.env.STRIPE_SECRET_KEY) {
+                return NextResponse.json({ error: "Stripe is not configured. Check STRIPE_SECRET_KEY." }, { status: 500 });
+            }
+            
+            let stripeDiscounts = [];
+            if (discountAmount > 0) {
+                try {
+                    const stripeCoupon = await stripe.coupons.create({
+                        amount_off: Math.round(discountAmount * 100),
+                        currency: "usd",
+                        duration: "once",
+                        name: `Discount ${appliedCoupon?.code || 'Custom'}`
+                    });
+                    stripeDiscounts.push({ coupon: stripeCoupon.id });
+                } catch (e) {
+                    console.error("Error creating stripe coupon:", e);
+                }
             }
 
-            const kashierMode = process.env.KASHIER_MODE || "test";
-            const formattedAmount = totalPrice.toFixed(2);
-            const orderId = order._id.toString();
-            const kashierCurrency = "EGP";
-            const pathString = `/?payment=${kashierMid}.${orderId}.${formattedAmount}.${kashierCurrency}`;
-            const hash = crypto.createHmac("sha256", kashierSecretKey)
-                .update(pathString)
-                .digest("hex");
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                line_items: orderItems.map(item => ({
+                    price_data: {
+                        currency: "usd", // Defaulting to EGP, you can change to "usd"
+                        product_data: {
+                            name: item.name,
+                            images: item.image && item.image.startsWith("http") ? [item.image] : [], // Stripe requires absolute URLs
+                        },
+                        unit_amount: Math.round(item.price * 100), // Stripe expects amounts in cents/piasters
+                    },
+                    quantity: item.qty,
+                })),
+                mode: "payment",
+                discounts: stripeDiscounts,
+                success_url: `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Cancel`,
+                metadata: {
+                    orderId: order._id.toString(),
+                }
+            });
 
-            const merchantRedirect = `${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/Success`;
-            const kashierUrl = `https://checkout.kashier.io/?` +
-                `merchantId=${kashierMid}` +
-                `&orderId=${orderId}` +
-                `&amount=${formattedAmount}` +
-                `&currency=${kashierCurrency}` +
-                `&hash=${hash}` +
-                `&merchantRedirect=${merchantRedirect}` +
-                `&mode=${kashierMode}` +
-                `&failureRedirect=true` +
-                `&redirectMethod=get` +
-                `&display=ar`;
-
-            return NextResponse.json({ success: true, url: kashierUrl });
+            return NextResponse.json({ success: true, url: session.url });
         }
 
-        return NextResponse.json({ error: "طريقة الدفع غير معتمدة. اختر Kashier أو COD." }, { status: 400 });
+        return NextResponse.json({ error: "طريقة الدفع غير معتمدة. اختر Stripe أو COD." }, { status: 400 });
 
     } catch (error) {
         console.error("❌ Checkout API Error:", error);

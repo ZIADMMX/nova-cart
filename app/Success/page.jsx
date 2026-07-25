@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,47 +15,20 @@ function SuccessPageContent() {
     const [loading, setLoading] = useState(true);
     const [verificationStatus, setVerificationStatus] = useState(null);
     const session_id = searchParams.get("session_id");
-    const paymentStatus = searchParams.get("paymentStatus");
-    const signature = searchParams.get("signature");
-    const merchantOrderId = searchParams.get("merchantOrderId");
 
     useEffect(() => {
         // مؤقت افتراضي للتحقق أو التحويل في حال فشل الجلسة
         const timer = setTimeout(() => {
-            if (!session_id && !(paymentStatus && signature && merchantOrderId)) {
+            if (!session_id) {
                 router.push("/");
             }
         }, 3000);
 
         const verifySession = async () => {
-            // 1. التحقق من Kashier إذا كان التوجيه قادماً منها
-            if (paymentStatus && signature && merchantOrderId) {
-                try {
-                    const response = await fetch(`/api/kashier/verify?${searchParams.toString()}`);
-                    const data = await response.json();
-                    if (data.success) {
-                        setVerificationStatus(true);
-                        clearCart();
-                    } else {
-                        setVerificationStatus(false);
-                    }
-                } catch (error) {
-                    console.error("Error في التحقق من كاشير:", error);
-                    setVerificationStatus(false);
-                } finally {
-                    setLoading(false);
-                }
-                return;
-            }
-
-            // 2. تحقق بسيط من COD أو فشل التحقق إذا لم تكن Kashier
+            // تحقق من الجلسة (سواء COD أو Stripe، يتم معالجة Stripe عبر Webhook لكن يمكن عرض النجاح هنا)
             if (session_id) {
-                if (session_id.startsWith("COD-")) {
-                    setVerificationStatus(true);
-                    clearCart();
-                } else {
-                    setVerificationStatus(false);
-                }
+                setVerificationStatus(true);
+                clearCart();
                 setLoading(false);
                 return;
             }
@@ -67,7 +40,7 @@ function SuccessPageContent() {
         verifySession();
 
         return () => clearTimeout(timer);
-    }, [session_id, paymentStatus, signature, merchantOrderId, searchParams, router]);
+    }, [session_id, searchParams, router]);
 
     // عرض شاشة الLoading إذا كانت الجلسة قيد الفحص
     if (loading) {
@@ -105,9 +78,9 @@ function SuccessPageContent() {
                 Thank you for shopping with us! We will contact you soon to confirm shipping details.
             </p>
 
-            {(session_id || merchantOrderId) && (
+            {session_id && (
                 <div className="bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono mb-8 w-full break-all">
-                    Order ID: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{(session_id || merchantOrderId).slice(-12)}</span>
+                    Session / Order ID: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{(session_id).slice(-12)}</span>
                 </div>
             )}
 

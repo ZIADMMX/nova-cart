@@ -10,7 +10,7 @@ export async function POST(request) {
         const ip = request.headers.get('x-forwarded-for') || request.ip || '127.0.0.1';
         const rateLimitResult = rateLimit(ip);
         if (!rateLimitResult.allowed) {
-            return NextResponse.json({ success: false, message: 'لقد تجاوزت عدد المحاوNoت المسموحة. يرجى المحاولة Noحقاً.' }, { status: 429 });
+            return NextResponse.json({ success: false, message: 'لقد تجاوزت عدد المحاولات المسموحة. يرجى المحاولة لاحقاً.' }, { status: 429 });
         }
 
         // 1. استقبال البيانات وتأمين اNoتصال بقاعدة البيانات

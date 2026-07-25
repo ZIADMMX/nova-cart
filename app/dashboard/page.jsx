@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/providers/AuthProvider"; 
 import AdminCharts from "@/components/AdminChart";
 import { 
-    User, ShoppingBag, DollarSign, ArrowRight, Package, Loader2, LayoutDashboard, Clock, AlertCircle, TrendingUp, BellRing, Settings, AlertTriangle, Users 
+    User, ShoppingBag, DollarSign, ArrowRight, Package, Loader2, LayoutDashboard, Clock, AlertCircle, TrendingUp, BellRing, Settings, AlertTriangle, Users, Ticket 
 } from "lucide-react"; 
 
 export default function Dashboard() { 
@@ -212,7 +212,7 @@ export default function Dashboard() {
                     ))}
                 </div> 
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"> 
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"> 
                     <Link href="/dashboard/products" className="flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-5 shadow-xs hover:shadow-md transition-all group">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl text-indigo-600">
@@ -237,6 +237,19 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                    </Link>
+
+                    <Link href="/dashboard/coupons" className="flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-5 shadow-xs hover:shadow-md transition-all group">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl text-amber-600">
+                                <Ticket className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Coupons & Discounts</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create and manage discount coupon codes</p>
+                            </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-amber-600 transition-colors" />
                     </Link>
 
                     <Link href="/dashboard/settings" className="flex items-center justify-between bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-5 shadow-xs hover:shadow-md transition-all group">

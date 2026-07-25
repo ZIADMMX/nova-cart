@@ -5,108 +5,279 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NovaCart - Documentation</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f9f9f9; }
-        .container { background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #2c3e50; }
-        h1 { border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 40px; }
-        pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 14px; }
-        code { font-family: 'Courier New', Courier, monospace; }
-        .alert { padding: 15px; background-color: #d9edf7; border-left: 5px solid #31708f; margin-bottom: 20px; border-radius: 4px; }
-        .alert-warning { background-color: #fcf8e3; border-left: 5px solid #8a6d3b; color: #8a6d3b; }
-        ul, ol { margin-left: 20px; }
-        li { margin-bottom: 10px; }
-        a { color: #3498db; text-decoration: none; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; color: #374151; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f3f4f6; }
+        .container { background: #fff; padding: 48px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+        h1 { color: #1e1b4b; font-size: 2rem; border-bottom: 3px solid #6366f1; padding-bottom: 12px; }
+        h2 { color: #1e40af; font-size: 1.3rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin-top: 48px; }
+        h3 { color: #374151; font-size: 1.05rem; margin-top: 24px; }
+        pre { background: #1e1e2e; color: #cdd6f4; padding: 18px; border-radius: 8px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; }
+        code { font-family: 'Courier New', Courier, monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: #6366f1; }
+        pre code { background: none; padding: 0; color: inherit; }
+        .alert { padding: 16px 20px; background-color: #eff6ff; border-left: 5px solid #3b82f6; margin: 20px 0; border-radius: 6px; color: #1e40af; }
+        .alert-warning { background-color: #fffbeb; border-left-color: #f59e0b; color: #92400e; }
+        .alert-success { background-color: #f0fdf4; border-left-color: #22c55e; color: #166534; }
+        ul, ol { margin-left: 24px; }
+        li { margin-bottom: 8px; }
+        a { color: #6366f1; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-yellow { background: #fef9c3; color: #854d0e; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background: #f8fafc; text-align: left; padding: 12px 16px; font-size: 13px; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
+        td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        tr:hover td { background: #fafafa; }
+        .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+        .feature-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+        .feature-card h4 { margin: 0 0 8px 0; color: #1e40af; font-size: 0.95rem; }
+        .feature-card p { margin: 0; font-size: 13px; color: #6b7280; }
+        @media (max-width: 640px) { .feature-grid { grid-template-columns: 1fr; } .container { padding: 24px; } }
+        .toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 28px; margin: 24px 0; }
+        .toc li { margin-bottom: 6px; }
+        footer { text-align: center; color: #9ca3af; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>NovaCart - Full-Stack E-Commerce Solution</h1>
-        <p><strong>Created:</strong> July 2026</p>
-        <p><strong>Author:</strong> Ziad</p>
+        <h1>🛒 NovaCart — Full-Stack E-Commerce Solution</h1>
+        <p>
+            <span class="badge badge-blue">Version 1.2.0</span>&nbsp;
+            <span class="badge badge-green">Next.js 16</span>&nbsp;
+            <span class="badge badge-yellow">July 2026</span>
+        </p>
+        <p>Thank you for purchasing <strong>NovaCart</strong>! This documentation will guide you through the complete setup process. Please read it carefully before getting started.</p>
+
+        <div class="toc">
+            <strong>📋 Table of Contents</strong>
+            <ol>
+                <li><a href="#introduction">Introduction & Features</a></li>
+                <li><a href="#requirements">System Requirements</a></li>
+                <li><a href="#installation">Installation Guide</a></li>
+                <li><a href="#configuration">Environment Configuration</a></li>
+                <li><a href="#running">Running the Application</a></li>
+                <li><a href="#admin">Admin Panel Setup</a></li>
+                <li><a href="#coupons">Coupon & Discount System</a></li>
+                <li><a href="#payment">Payment Gateway (Stripe)</a></li>
+                <li><a href="#email">Email Notifications</a></li>
+                <li><a href="#deployment">Production Deployment</a></li>
+                <li><a href="#support">Support</a></li>
+            </ol>
+        </div>
+
+        <!-- ==================== SECTION 1 ==================== -->
+        <h2 id="introduction">1. Introduction & Features</h2>
+        <p>NovaCart is a modern, blazing-fast, and highly secure e-commerce platform built with the latest web technologies. It is designed to be easy to set up, customize, and scale.</p>
         
-        <h2>Table of Contents</h2>
-        <ul>
-            <li><a href="#introduction">1. Introduction</a></li>
-            <li><a href="#requirements">2. System Requirements</a></li>
-            <li><a href="#installation">3. Installation Guide</a></li>
-            <li><a href="#configuration">4. Environment Configuration</a></li>
-            <li><a href="#running">5. Running the Application</a></li>
-            <li><a href="#admin">6. Admin Panel Setup</a></li>
-            <li><a href="#payment">7. Payment Gateways</a></li>
-        </ul>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🛍️ Full Storefront</h4>
+                <p>Product listing, detail pages, search, cart system, and smooth checkout flow.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🎟️ Coupon & Discount System</h4>
+                <p>Create percentage, fixed amount, and free shipping coupons with expiry dates and usage limits.</p>
+            </div>
+            <div class="feature-card">
+                <h4>💳 Stripe Payments</h4>
+                <p>Secure card payments via Stripe Checkout. Supports test and live modes. Cash on Delivery also included.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚙️ Admin Dashboard</h4>
+                <p>Manage products, orders, users, coupons, and view revenue analytics — all in one place.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔐 Authentication System</h4>
+                <p>JWT-based secure authentication with protected routes and role-based access control (Admin / User).</p>
+            </div>
+            <div class="feature-card">
+                <h4>📧 Email Notifications</h4>
+                <p>Automatic order confirmation emails sent to customers upon successful purchase.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🤖 AI Chatbot</h4>
+                <p>Integrated AI assistant powered by Google Gemini to help customers find products.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📦 Stock Management</h4>
+                <p>Atomic stock reservation during checkout prevents overselling. Low-stock alerts in the dashboard.</p>
+            </div>
+        </div>
 
-        <h2 id="introduction">1. Introduction</h2>
-        <p>Welcome to NovaCart! This is a modern, blazing fast, and highly secure E-Commerce platform built using Next.js 14, React, MongoDB, and TailwindCSS. It comes out of the box with an AI-powered Chatbot assistant, Stripe & Paymob payment integrations, and a powerful Admin Dashboard.</p>
-
+        <!-- ==================== SECTION 2 ==================== -->
         <h2 id="requirements">2. System Requirements</h2>
-        <p>Before you begin, make sure you have the following installed on your server or local machine:</p>
-        <ul>
-            <li><strong>Node.js</strong>: Version 18.17.0 or higher</li>
-            <li><strong>NPM / Yarn</strong>: Node Package Manager</li>
-            <li><strong>MongoDB</strong>: A MongoDB cluster (MongoDB Atlas is recommended)</li>
-        </ul>
+        <table>
+            <thead><tr><th>Requirement</th><th>Minimum Version</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Node.js</strong></td><td>18.17.0+</td><td>Version 20+ recommended</td></tr>
+                <tr><td><strong>NPM</strong></td><td>9.0.0+</td><td>Comes with Node.js</td></tr>
+                <tr><td><strong>MongoDB</strong></td><td>6.0+</td><td>MongoDB Atlas (cloud) is recommended</td></tr>
+                <tr><td><strong>Stripe Account</strong></td><td>—</td><td>Free account at stripe.com</td></tr>
+                <tr><td><strong>Google Account</strong></td><td>—</td><td>For Gemini AI & Gmail email sender</td></tr>
+            </tbody>
+        </table>
 
+        <!-- ==================== SECTION 3 ==================== -->
         <h2 id="installation">3. Installation Guide</h2>
-        <p>Follow these steps to set up the project locally or on your server:</p>
         <ol>
-            <li>Unzip the downloaded package.</li>
-            <li>Open a terminal and navigate to the <code>Source_Code</code> directory.</li>
-            <li>Run the following command to install all necessary dependencies:</li>
+            <li>Unzip the downloaded package. You will find a <code>Source_Code</code> folder.</li>
+            <li>Open a terminal / command prompt and navigate into the folder:
+                <pre><code>cd Source_Code</code></pre>
+            </li>
+            <li>Install all dependencies:
+                <pre><code>npm install</code></pre>
+            </li>
+            <li>Create your environment file by copying the example:
+                <pre><code>cp .env.example .env.local</code></pre>
+                <em>On Windows:</em> <code>copy .env.example .env.local</code>
+            </li>
         </ol>
-        <pre><code>npm install</code></pre>
 
+        <!-- ==================== SECTION 4 ==================== -->
         <h2 id="configuration">4. Environment Configuration</h2>
         <div class="alert alert-warning">
-            <strong>Important:</strong> You must configure your environment variables for the application to connect to the database and payment gateways.
+            <strong>⚠️ Important:</strong> The application will NOT work without properly filling in all required environment variables in your <code>.env.local</code> file.
         </div>
-        <p>In the root folder, you will find a file named <code>.env.example</code>. Rename this file to <code>.env</code> (or create a new <code>.env</code> file) and fill in your credentials as follows:</p>
-        <pre><code># MongoDB Connection String
+        <p>Open <code>.env.local</code> and fill in all values:</p>
+        <pre><code># --- Database (Required) ---
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/novacart
 
-# JWT Secret for Authentication (Generate any random strong string)
-JWT_SECRET=your_super_secret_jwt_string
+# --- Authentication (Required) ---
+JWT_SECRET=your_super_long_random_secret_string_here
 
-# Public URL (Change this in production, e.g., https://yourdomain.com)
+# --- Application URL (Required) ---
 NEXT_PUBLIC_URL=http://localhost:3000
 
-# Gemini API Key for AI Chatbot
-GEMINI_API_KEY=your_gemini_key
+# --- Stripe Payment (Required for card payments) ---
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Paymob Credentials
-PAYMOB_API_KEY=your_paymob_api_key
-PAYMOB_HMAC_SECRET=your_hmac_secret
-PAYMOB_INTEGRATION_ID=your_integration_id
-PAYMOB_IFRAME_ID=your_iframe_id</code></pre>
+# --- Email Notifications (Required for order emails) ---
+EMAIL_USER=your_gmail@gmail.com
+EMAIL_PASS=your_gmail_app_password
 
-        <h2 id="running">5. Running the Application</h2>
-        <p>To run the application in <strong>development</strong> mode:</p>
-        <pre><code>npm run dev</code></pre>
-        <p>To build and run the application in <strong>production</strong> mode (Recommended for live servers):</p>
-        <pre><code>npm run build
-npm start</code></pre>
+# --- AI Chatbot (Optional) ---
+GEMINI_API_KEY=your_google_ai_key</code></pre>
 
-        <h2 id="admin">6. Admin Panel Setup</h2>
-        <p>By default, the first user registered is a regular user. To grant Admin access:</p>
+        <h3>How to get your MongoDB URI?</h3>
         <ol>
-            <li>Register a new account on your website normally via the <code>/auth/register</code> page.</li>
-            <li>Open your MongoDB Database Dashboard (e.g., MongoDB Atlas).</li>
-            <li>Go to the <code>users</code> collection.</li>
-            <li>Find your registered user document and change the <code>role</code> field from <code>"user"</code> to <code>"super_admin"</code>.</li>
-            <li>Log back into your account on the website. You will now have access to the Admin Dashboard at <code>/dashboard</code>.</li>
+            <li>Go to <a href="https://cloud.mongodb.com" target="_blank">cloud.mongodb.com</a> and create a free cluster.</li>
+            <li>Click "Connect" → "Drivers" → Copy the connection string.</li>
+            <li>Replace <code>&lt;password&gt;</code> with your database user password.</li>
         </ol>
 
-        <h2 id="payment">7. Payment Gateways</h2>
-        <h3>Stripe Integration</h3>
-        <p>To use Stripe, ensure you have your Stripe Secret Key and Public Key. Update your codebase or environment variables with the live keys to accept real payments. Register your webhook URL in the Stripe dashboard as <code>https://yourdomain.com/api/webhook/stripe</code>.</p>
+        <!-- ==================== SECTION 5 ==================== -->
+        <h2 id="running">5. Running the Application</h2>
+        <h3>Development Mode</h3>
+        <pre><code>npm run dev</code></pre>
+        <p>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> in your browser.</p>
+
+        <h3>Production Build</h3>
+        <pre><code>npm run build
+npm start</code></pre>
+        <div class="alert alert-success">
+            <strong>✅ Tip:</strong> For production hosting, we recommend <strong>Vercel</strong> (free tier available). Just connect your GitHub repository and set your environment variables in the Vercel dashboard.
+        </div>
+
+        <!-- ==================== SECTION 6 ==================== -->
+        <h2 id="admin">6. Admin Panel Setup</h2>
+        <div class="alert">
+            <strong>ℹ️ Note:</strong> The Admin Panel is accessible at <code>/dashboard</code>. Only users with the <code>admin</code> or <code>super_admin</code> role can access it.
+        </div>
+        <p>To grant admin access to your account:</p>
+        <ol>
+            <li>Register a normal account at <code>/auth/register</code>.</li>
+            <li>Log in to your <strong>MongoDB Atlas</strong> dashboard.</li>
+            <li>Open the <code>users</code> collection.</li>
+            <li>Find your user document and change the <code>role</code> field to <code>"super_admin"</code>.</li>
+            <li>Log back into the website — you now have full Admin access.</li>
+        </ol>
+        <h3>Admin Dashboard Pages</h3>
+        <table>
+            <thead><tr><th>Page</th><th>URL</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>Dashboard Overview</td><td><code>/dashboard</code></td><td>Revenue stats, recent orders, low-stock alerts</td></tr>
+                <tr><td>Products</td><td><code>/dashboard/products</code></td><td>Add, edit, and delete products</td></tr>
+                <tr><td>Orders</td><td><code>/dashboard/orders</code></td><td>View and update order statuses</td></tr>
+                <tr><td>Users</td><td><code>/dashboard/users</code></td><td>View all registered customers</td></tr>
+                <tr><td><strong>Coupons</strong></td><td><code>/dashboard/coupons</code></td><td>Create and manage discount coupon codes</td></tr>
+                <tr><td>Settings</td><td><code>/dashboard/settings</code></td><td>Update store social media links</td></tr>
+            </tbody>
+        </table>
+
+        <!-- ==================== SECTION 7 ==================== -->
+        <h2 id="coupons">7. Coupon & Discount System</h2>
+        <p>NovaCart includes a complete coupon management system. Navigate to <code>/dashboard/coupons</code> to manage your coupons.</p>
+        <h3>Coupon Types</h3>
+        <table>
+            <thead><tr><th>Type</th><th>Description</th><th>Example</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge badge-blue">Percentage</span></td><td>Deducts a % from the order total</td><td>Code <code>SAVE20</code> → 20% off</td></tr>
+                <tr><td><span class="badge badge-green">Fixed Amount</span></td><td>Deducts a fixed amount from the total</td><td>Code <code>OFF50</code> → 50 EGP off</td></tr>
+                <tr><td><span class="badge badge-yellow">Free Shipping</span></td><td>Waives shipping fees</td><td>Code <code>FREESHIP</code></td></tr>
+            </tbody>
+        </table>
+        <h3>Coupon Options</h3>
+        <ul>
+            <li><strong>Expiry Date:</strong> Set when the coupon automatically deactivates.</li>
+            <li><strong>Usage Limit:</strong> Limit total redemptions (e.g., first 100 customers only). Leave blank for unlimited.</li>
+            <li><strong>Minimum Order Amount:</strong> Only activate the coupon if the cart exceeds a set amount.</li>
+            <li><strong>Active / Inactive Toggle:</strong> Enable or disable any coupon instantly from the dashboard.</li>
+        </ul>
+
+        <!-- ==================== SECTION 8 ==================== -->
+        <h2 id="payment">8. Payment Gateway (Stripe)</h2>
+        <ol>
+            <li>Create a free account at <a href="https://stripe.com" target="_blank">stripe.com</a>.</li>
+            <li>Copy your <strong>Publishable Key</strong> and <strong>Secret Key</strong> from the Stripe Dashboard → Developers → API Keys.</li>
+            <li>Paste them into your <code>.env.local</code> file.</li>
+            <li>Register your Webhook endpoint in Stripe Dashboard → Developers → Webhooks:
+                <pre><code>https://yourdomain.com/api/webhook/stripe</code></pre>
+                Select the event: <code>checkout.session.completed</code>
+            </li>
+            <li>Copy the <strong>Webhook Signing Secret</strong> and paste it as <code>STRIPE_WEBHOOK_SECRET</code>.</li>
+        </ol>
+        <div class="alert alert-warning">
+            <strong>⚠️ Testing:</strong> Use Stripe test card number <code>4242 4242 4242 4242</code> with any future expiry date to simulate payments during testing.
+        </div>
+
+        <!-- ==================== SECTION 9 ==================== -->
+        <h2 id="email">9. Email Notifications</h2>
+        <p>NovaCart sends automatic order confirmation emails to customers. To enable this:</p>
+        <ol>
+            <li>Enable <strong>2-Factor Authentication</strong> on your Google Account.</li>
+            <li>Go to <a href="https://myaccount.google.com/apppasswords" target="_blank">Google App Passwords</a>.</li>
+            <li>Create a new App Password for "Mail".</li>
+            <li>Copy the generated 16-character password and paste it as <code>EMAIL_PASS</code> in your <code>.env.local</code>.</li>
+            <li>Set <code>EMAIL_USER</code> to your Gmail address.</li>
+        </ol>
+
+        <!-- ==================== SECTION 10 ==================== -->
+        <h2 id="deployment">10. Production Deployment (Vercel — Recommended)</h2>
+        <ol>
+            <li>Push your source code to a <strong>GitHub repository</strong> (make sure <code>.env.local</code> is in <code>.gitignore</code> — it is by default).</li>
+            <li>Go to <a href="https://vercel.com" target="_blank">vercel.com</a> and create a new project from your repository.</li>
+            <li>In the Vercel project settings, go to <strong>Environment Variables</strong> and add all variables from your <code>.env.local</code> file.</li>
+            <li>Deploy. Vercel will automatically build and host your application.</li>
+            <li>Update <code>NEXT_PUBLIC_URL</code> in Vercel to your live domain URL.</li>
+            <li>Update your Stripe Webhook URL to point to your live domain.</li>
+            <li>In MongoDB Atlas, go to <strong>Network Access</strong> and allow connections from <code>0.0.0.0/0</code> (all IPs) for Vercel compatibility.</li>
+        </ol>
+
+        <!-- ==================== SECTION 11 ==================== -->
+        <h2 id="support">11. Support</h2>
+        <p>If you need help with NovaCart, please use the <strong>Comments / Support tab</strong> on the CodeCanyon item page. Before submitting a support request, please:</p>
+        <ul>
+            <li>Make sure you have read this documentation completely.</li>
+            <li>Double-check all environment variables are correctly filled in.</li>
+            <li>Check your browser console and terminal for any error messages and include them in your support request.</li>
+        </ul>
         
-        <h3>Paymob Integration</h3>
-        <p>For Paymob (Egypt/MENA), you have entered the integration details in the <code>.env</code> file. Ensure your callback URLs in the Paymob dashboard are set to <code>https://yourdomain.com/api/paymob/verify</code>.</p>
-        
-        <br>
-        <hr>
-        <p style="text-align: center; color: #777; margin-top: 20px;">Thank you for purchasing NovaCart! For support, please contact via the CodeCanyon support tab.</p>
+        <footer>
+            <p>Thank you for purchasing <strong>NovaCart</strong>! ⭐ If you enjoy it, please leave a 5-star rating on CodeCanyon — it means a lot!</p>
+        </footer>
     </div>
 </body>
 </html>
